@@ -24,13 +24,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Inicializar o projeto com toda a toolchain configurada e pronta para desenvolvimento.
 
 #### Entregas
-- [ ] `npx create-next-app@latest` com TypeScript, App Router e Tailwind CSS
-- [ ] Instalar e inicializar shadcn/ui (`npx shadcn@latest init`)
-- [ ] Criar estrutura de pastas: `app/`, `components/ui/`, `lib/`, `types/`, `supabase/migrations/`, `supabase/functions/`, `docs/`
-- [ ] Configurar ESLint + Prettier (`.eslintrc.json`, `.prettierrc`)
-- [ ] Configurar `tsconfig.json` com path alias `@/` apontando para a raiz
-- [ ] Criar `.env.local.example` com todas as variáveis necessárias documentadas
-- [ ] Confirmar `npm run dev` roda em `localhost:3000` sem erros
+- [x] `npx create-next-app@latest` com TypeScript, App Router e Tailwind CSS
+- [x] Instalar e inicializar shadcn/ui (`npx shadcn@latest init`)
+- [x] Criar estrutura de pastas: `app/`, `components/ui/`, `lib/`, `types/`, `supabase/migrations/`, `supabase/functions/`, `docs/`
+- [x] Configurar ESLint + Prettier (`.eslintrc.json`, `.prettierrc`)
+- [x] Configurar `tsconfig.json` com path alias `@/` apontando para a raiz
+- [x] Criar `.env.local.example` com todas as variáveis necessárias documentadas
+- [x] Confirmar `npm run dev` roda em `localhost:3000` sem erros
 
 **Commit final:** `feat: scaffold Next.js 14 + Tailwind + shadcn/ui`
 
@@ -306,7 +306,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 
 | # | Milestone | Branch | Status |
 |---|---|---|---|
-| M1 | Scaffold | `feat/scaffold` | ⬜ Pendente |
+| M1 | Scaffold | `feat/scaffold` | ✅ Concluído |
 | M2 | Design System & Shell | `feat/design-system` | ⬜ Pendente |
 | M3 | Auth UI | `feat/auth-ui` | ⬜ Pendente |
 | M4 | Leads UI | `feat/leads-ui` | ⬜ Pendente |
