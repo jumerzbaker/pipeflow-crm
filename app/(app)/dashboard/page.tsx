@@ -1,31 +1,68 @@
+import { Users, Briefcase, CircleDollarSign, Target } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { Button } from '@/components/ui/button'
+import { MetricCard } from '@/components/dashboard/MetricCard'
+import { FunnelChart } from '@/components/dashboard/FunnelChart'
+import { UpcomingDeals } from '@/components/dashboard/UpcomingDeals'
+import { DASHBOARD_METRICS, FUNNEL_DATA, UPCOMING_DEALS } from '@/lib/mock/dashboard'
+
+function formatBRL(value: number) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
 
 export default function DashboardPage() {
+  const m = DASHBOARD_METRICS
+
+  const metrics = [
+    {
+      label: 'Total de Leads',
+      value: String(m.totalLeads),
+      delta: m.totalLeadsDelta,
+      icon: Users,
+    },
+    {
+      label: 'Negócios Abertos',
+      value: String(m.openDeals),
+      delta: m.openDealsDelta,
+      icon: Briefcase,
+    },
+    {
+      label: 'Valor do Pipeline',
+      value: formatBRL(m.pipelineValue),
+      delta: m.pipelineValueDelta,
+      icon: CircleDollarSign,
+    },
+    {
+      label: 'Taxa de Conversão',
+      value: `${m.conversionRate}%`,
+      delta: m.conversionRateDelta,
+      icon: Target,
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
         subtitle="Visão geral do seu pipeline de vendas"
-        action={<Button>Novo Lead</Button>}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {['Total de Leads', 'Negócios Abertos', 'Valor do Pipeline', 'Taxa de Conversão'].map(
-          (label) => (
-            <div
-              key={label}
-              className="rounded-lg border border-gray-800 bg-gray-900 p-4"
-            >
-              <p className="text-xs text-gray-500">{label}</p>
-              <div className="mt-2 h-6 w-20 animate-pulse rounded bg-gray-800" />
-            </div>
-          ),
-        )}
+        {metrics.map((metric) => (
+          <MetricCard key={metric.label} {...metric} />
+        ))}
       </div>
 
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-600">
-        Gráficos e métricas — em breve (M7)
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <FunnelChart data={FUNNEL_DATA} />
+        </div>
+        <div className="lg:col-span-1">
+          <UpcomingDeals deals={UPCOMING_DEALS} />
+        </div>
       </div>
     </div>
   )
