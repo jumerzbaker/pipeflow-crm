@@ -204,10 +204,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-gray-800">
             <div
               className={cn(
-                'flex size-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white text-[11px] font-bold',
+                'flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white text-sm font-semibold',
               )}
             >
-              {mockUser.initials}
+              {mockUser.initials[0]}
             </div>
             <div className="min-w-0 flex-1 text-left">
               <p className="truncate text-xs font-medium text-white">
