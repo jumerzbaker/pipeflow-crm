@@ -45,14 +45,14 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Estabelecer a identidade visual e o layout base do app autenticado.
 
 #### Entregas
-- [ ] Tokens de cor no `tailwind.config.ts` (brand, cinzas, estados)
-- [ ] Sidebar fixa `components/shared/Sidebar.tsx` — logo, nav items com ícones, rodapé com avatar do usuário
-- [ ] Workspace switcher dropdown na sidebar (estático, lista hardcoded)
-- [ ] Layout autenticado `app/(app)/layout.tsx` — sidebar + área de conteúdo
-- [ ] Topbar com breadcrumb e avatar do usuário
-- [ ] Componente reutilizável `PageHeader` (título + subtítulo + botão de ação primária)
-- [ ] Dark sidebar (`bg-gray-900`) + content area (`bg-gray-50` / branco)
-- [ ] Verificar responsividade básica (sidebar recolhível em telas menores)
+- [x] Tokens de cor no `globals.css` via CSS variables (brand, cinzas, estados)
+- [x] Sidebar fixa `components/shared/Sidebar.tsx` — logo, nav items com ícones, rodapé com avatar do usuário
+- [x] Workspace switcher dropdown na sidebar (estático, lista hardcoded)
+- [x] Layout autenticado `app/(app)/layout.tsx` — sidebar + área de conteúdo
+- [x] Topbar com breadcrumb e avatar do usuário
+- [x] Componente reutilizável `PageHeader` (título + subtítulo + botão de ação primária)
+- [x] Dark sidebar (`bg-gray-900`) + content area (`bg-gray-950`)
+- [x] Responsividade básica implementada (sidebar recolhível em telas menores com backdrop)
 
 **Commit final:** `feat: design system, shell layout e sidebar`
 
@@ -63,14 +63,14 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Criar as telas de autenticação com validação de formulários, prontas para conectar ao Supabase.
 
 #### Entregas
-- [ ] Layout centrado `app/(auth)/layout.tsx` — logo centralizado, fundo neutro
-- [ ] Página de login `app/(auth)/login/page.tsx` — form email + senha + link "Esqueci a senha"
-- [ ] Página de cadastro `app/(auth)/signup/page.tsx` — form nome + email + senha
-- [ ] Página de recuperação `app/(auth)/forgot-password/page.tsx` — form email
-- [ ] Validação client-side com `react-hook-form` + `zod` (campos obrigatórios, formato de e-mail)
-- [ ] Feedback visual de erro por campo (shadcn/ui `FormMessage`)
-- [ ] Estado de loading no botão de submit
-- [ ] Redirect placeholder: login redireciona para `/dashboard` (hardcoded)
+- [x] Layout centrado `app/(auth)/layout.tsx` — logo centralizado, fundo neutro
+- [x] Página de login `app/(auth)/login/page.tsx` — form email + senha + link "Esqueci a senha"
+- [x] Página de cadastro `app/(auth)/signup/page.tsx` — form nome + email + senha
+- [x] Página de recuperação `app/(auth)/forgot-password/page.tsx` — form email
+- [x] Validação com `useActionState` + `zod` (campos obrigatórios, formato de e-mail)
+- [x] Feedback visual de erro por campo (`FieldError` component)
+- [x] Estado de loading no botão de submit
+- [x] Redirect placeholder: login redireciona para `/dashboard` (hardcoded)
 
 **Commit final:** `feat: páginas de auth UI (login, signup, forgot-password)`
 
@@ -308,7 +308,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 |---|---|---|---|
 | M1 | Scaffold | `feat/scaffold` | ✅ Concluído |
 | M2 | Design System & Shell | `feat/design-system` | ✅ Concluído |
-| M3 | Auth UI | `feat/auth-ui` | ⬜ Pendente |
+| M3 | Auth UI | `feat/auth-ui` | ✅ Concluído |
 | M4 | Leads UI | `feat/leads-ui` | ⬜ Pendente |
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ⬜ Pendente |
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ⬜ Pendente |
