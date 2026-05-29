@@ -13,6 +13,8 @@ interface PipelineColumnProps {
   dimColor: string
   deals: Deal[]
   onAddDeal: (stage: DealStage) => void
+  onEditDeal: (deal: Deal) => void
+  onMoveDeal: (dealId: string, stage: DealStage) => void
 }
 
 function formatCurrency(value: number): string {
@@ -30,6 +32,8 @@ export function PipelineColumn({
   dimColor,
   deals,
   onAddDeal,
+  onEditDeal,
+  onMoveDeal,
 }: PipelineColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
 
@@ -100,7 +104,13 @@ export function PipelineColumn({
         }}
       >
         {deals.map((deal) => (
-          <DealCard key={deal.id} deal={deal} stageColor={color} />
+          <DealCard
+            key={deal.id}
+            deal={deal}
+            stageColor={color}
+            onEdit={() => onEditDeal(deal)}
+            onMove={(newStage) => onMoveDeal(deal.id, newStage)}
+          />
         ))}
 
         {deals.length === 0 && !isOver && (
