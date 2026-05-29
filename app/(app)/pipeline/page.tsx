@@ -1,18 +1,31 @@
+'use client'
+
+import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
+import { PipelineBoard } from '@/components/pipeline/PipelineBoard'
 
 export default function PipelinePage() {
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   return (
-    <div className="space-y-6">
+    <div className="flex h-full flex-col gap-6">
       <PageHeader
         title="Pipeline"
         subtitle="Acompanhe o progresso dos seus negócios"
-        action={<Button>Novo Negócio</Button>}
+        action={
+          <Button onClick={() => setSheetOpen(true)}>
+            <Plus />
+            Novo negócio
+          </Button>
+        }
       />
 
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-600">
-        Board Kanban — em breve (M5)
-      </div>
+      <PipelineBoard
+        globalSheetOpen={sheetOpen}
+        onGlobalSheetClose={() => setSheetOpen(false)}
+      />
     </div>
   )
 }
