@@ -15,7 +15,12 @@ import {
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
-const workspaceColors = ['bg-violet-500', 'bg-emerald-500', 'bg-amber-500', 'bg-sky-500'] as const
+const workspaceColors = [
+  'bg-[#5b7fff]',
+  'bg-[#2ed573]',
+  'bg-[#ff6b35]',
+  'bg-[#00b4d8]',
+] as const
 
 const workspaces = [
   { id: '1', name: 'Acme Corp', plan: 'Pro', colorIdx: 0 },
@@ -63,24 +68,32 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-gray-900 transition-transform duration-300 ease-in-out',
+          'fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-pf-surface transition-transform duration-300 ease-in-out',
+          'border-r border-pf-border-subtle',
           'lg:static lg:translate-x-0 lg:z-auto',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {/* ── Logo ─────────────────────────────────────────────── */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-800 px-4">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-pf-border-subtle px-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-violet-600 text-white text-xs font-bold tracking-tight">
+            <div className="flex size-7 items-center justify-center rounded-md bg-pf-accent text-[0.7rem] font-bold tracking-tight text-pf-accent-fg"
+              style={{ fontFamily: 'var(--font-syne)' }}
+            >
               P
             </div>
-            <span className="text-sm font-semibold text-white tracking-wide">
-              PipeFlow
-            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-bold text-pf-text" style={{ fontFamily: 'var(--font-syne)' }}>
+                PipeFlow
+              </span>
+              <span className="text-[10px] font-normal text-pf-text-muted" style={{ fontFamily: 'var(--font-syne)' }}>
+                CRM
+              </span>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-300 lg:hidden"
+            className="rounded-md p-1 text-pf-text-muted transition-colors hover:bg-pf-surface-2 hover:text-pf-text-sec lg:hidden"
             aria-label="Fechar menu"
           >
             <X className="size-4" />
@@ -88,14 +101,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         {/* ── Workspace switcher ───────────────────────────────── */}
-        <div className="relative shrink-0 border-b border-gray-800 p-2">
+        <div className="relative shrink-0 border-b border-pf-border-subtle p-2">
           <button
             onClick={() => setSwitcherOpen(!switcherOpen)}
             className={cn(
               'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors',
               switcherOpen
-                ? 'bg-gray-800 text-white'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                ? 'bg-pf-surface-2 text-pf-text'
+                : 'text-pf-text-sec hover:bg-pf-surface-2 hover:text-pf-text',
             )}
           >
             <div
@@ -107,16 +120,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               {activeWorkspace.name[0]}
             </div>
             <div className="min-w-0 flex-1 text-left">
-              <p className="truncate text-xs font-medium text-white leading-none">
+              <p className="truncate text-xs font-medium text-pf-text leading-none">
                 {activeWorkspace.name}
               </p>
-              <p className="mt-0.5 text-[10px] text-gray-500 leading-none">
+              <p className="mt-0.5 text-[10px] text-pf-text-muted leading-none font-mono">
                 Plano {activeWorkspace.plan}
               </p>
             </div>
             <ChevronDown
               className={cn(
-                'size-3.5 shrink-0 text-gray-500 transition-transform duration-200',
+                'size-3.5 shrink-0 text-pf-text-muted transition-transform duration-200',
                 switcherOpen && 'rotate-180',
               )}
             />
@@ -124,16 +137,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
           {/* Dropdown */}
           {switcherOpen && (
-            <div className="absolute left-2 right-2 top-full z-20 mt-1 overflow-hidden rounded-lg border border-gray-700 bg-gray-800 shadow-xl shadow-black/40">
+            <div className="absolute left-2 right-2 top-full z-20 mt-1 overflow-hidden rounded-lg border border-pf-border bg-pf-surface-2 shadow-xl shadow-black/40">
               <div className="p-1">
-                <p className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-gray-500">
+                <p className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-pf-text-muted font-mono">
                   Workspaces
                 </p>
                 {workspaces.map((ws) => (
                   <button
                     key={ws.id}
                     onClick={() => handleWorkspaceSelect(ws)}
-                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-gray-700"
+                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-pf-border"
                   >
                     <div
                       className={cn(
@@ -144,21 +157,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       {ws.name[0]}
                     </div>
                     <div className="min-w-0 flex-1 text-left">
-                      <p className="truncate text-xs font-medium text-white">
+                      <p className="truncate text-xs font-medium text-pf-text">
                         {ws.name}
                       </p>
-                      <p className="text-[10px] text-gray-500">
+                      <p className="text-[10px] text-pf-text-muted font-mono">
                         Plano {ws.plan}
                       </p>
                     </div>
                     {ws.id === activeWorkspace.id && (
-                      <Check className="size-3.5 shrink-0 text-violet-400" />
+                      <Check className="size-3.5 shrink-0 text-pf-accent" />
                     )}
                   </button>
                 ))}
               </div>
-              <div className="border-t border-gray-700 p-1">
-                <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs text-gray-400 transition-colors hover:bg-gray-700 hover:text-white">
+              <div className="border-t border-pf-border-subtle p-1">
+                <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs text-pf-text-sec transition-colors hover:bg-pf-border hover:text-pf-text">
                   <Plus className="size-3.5 shrink-0" />
                   Novo workspace
                 </button>
@@ -181,14 +194,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium transition-colors',
                       active
-                        ? 'bg-violet-600 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                        ? 'bg-[color-mix(in_srgb,#caff33_10%,transparent)] text-pf-accent'
+                        : 'text-pf-text-sec hover:bg-pf-surface-2 hover:text-pf-text',
                     )}
                   >
                     <item.icon
                       className={cn(
                         'size-4 shrink-0',
-                        active ? 'text-white' : 'text-gray-500',
+                        active ? 'text-pf-accent' : 'text-pf-text-muted',
                       )}
                     />
                     {item.label}
@@ -200,20 +213,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* ── User footer ─────────────────────────────────────── */}
-        <div className="shrink-0 border-t border-gray-800 p-2">
-          <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-gray-800">
-            <div
-              className={cn(
-                'flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white text-sm font-semibold',
-              )}
-            >
-              {mockUser.initials[0]}
+        <div className="shrink-0 border-t border-pf-border-subtle p-2">
+          <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-pf-surface-2">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pf-surface-2 border border-pf-border text-pf-text-sec text-xs font-bold font-mono">
+              {mockUser.initials}
             </div>
             <div className="min-w-0 flex-1 text-left">
-              <p className="truncate text-xs font-medium text-white">
+              <p className="truncate text-xs font-medium text-pf-text">
                 {mockUser.name}
               </p>
-              <p className="truncate text-[10px] text-gray-500">
+              <p className="truncate text-[10px] text-pf-text-muted font-mono">
                 {mockUser.email}
               </p>
             </div>

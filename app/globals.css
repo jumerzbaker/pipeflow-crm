@@ -5,45 +5,61 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* — Semantic tokens mapped to shadcn variables — */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+
+  /* — PipeFlow brand tokens — */
+  --color-pf-accent: var(--pf-accent);
+  --color-pf-accent-fg: var(--pf-accent-fg);
+  --color-pf-bg: var(--pf-bg);
+  --color-pf-surface: var(--pf-surface);
+  --color-pf-surface-2: var(--pf-surface-2);
+  --color-pf-border: var(--pf-border);
+  --color-pf-border-subtle: var(--pf-border-subtle);
+  --color-pf-text: var(--pf-text);
+  --color-pf-text-sec: var(--pf-text-sec);
+  --color-pf-text-muted: var(--pf-text-muted);
+  --color-pf-positive: var(--pf-positive);
+  --color-pf-negative: var(--pf-negative);
+  --color-pf-warm: var(--pf-warm);
+  --color-pf-cool: var(--pf-cool);
+
+  /* — Radius — */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -51,8 +67,37 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* — Typography — */
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-heading: var(--font-syne);
+  --font-display: var(--font-syne);
 }
 
+/* ────────────────────────────────────────────────────────────────
+   PipeFlow brand tokens (single source of truth, always on)
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  --pf-accent: #caff33;
+  --pf-accent-fg: #0c0c0e;
+  --pf-bg: #0c0c0e;
+  --pf-surface: #141416;
+  --pf-surface-2: #1a1a1e;
+  --pf-border: #2a2a2e;
+  --pf-border-subtle: #1e1e22;
+  --pf-text: #e8e8e8;
+  --pf-text-sec: #8a8a8f;
+  --pf-text-muted: #555559;
+  --pf-positive: #2ed573;
+  --pf-negative: #ff4757;
+  --pf-warm: #ff6b35;
+  --pf-cool: #5b7fff;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Light mode defaults (keep shadcn compat, app runs in dark)
+   ──────────────────────────────────────────────────────────────── */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -93,38 +138,66 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* ────────────────────────────────────────────────────────────────
+   Dark mode — PipeFlow brand guide colors
+   ──────────────────────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Page background: #0C0C0E */
+  --background: #0c0c0e;
+  /* Main text: #E8E8E8 */
+  --foreground: #e8e8e8;
+
+  /* Surface (cards, panels): #141416 */
+  --card: #141416;
+  --card-foreground: #e8e8e8;
+  --popover: #141416;
+  --popover-foreground: #e8e8e8;
+
+  /* Primary action = accent (#CAFF33 chartreuse) */
+  --primary: #caff33;
+  --primary-foreground: #0c0c0e;
+
+  /* Surface-2 for hover/secondary: #1A1A1E */
+  --secondary: #1a1a1e;
+  --secondary-foreground: #e8e8e8;
+  --muted: #1a1a1e;
+  --muted-foreground: #8a8a8f;
+  --accent: #1a1a1e;
+  --accent-foreground: #e8e8e8;
+
+  /* Negative/destructive: #FF4757 */
+  --destructive: #ff4757;
+
+  /* Border: #2A2A2E */
+  --border: #2a2a2e;
+  --input: #2a2a2e;
+
+  /* Ring = accent at low opacity */
+  --ring: color-mix(in srgb, #caff33 25%, transparent);
+
+  /* Charts */
+  --chart-1: #5b7fff;
+  --chart-2: #00b4d8;
+  --chart-3: #caff33;
+  --chart-4: #ff6b35;
+  --chart-5: #2ed573;
+
+  /* Brand */
+  --brand: #caff33;
+  --brand-foreground: #0c0c0e;
+  --success: #2ed573;
+  --warning: #ff6b35;
+  --info: #5b7fff;
+
+  /* Sidebar */
+  --sidebar: #141416;
+  --sidebar-foreground: #e8e8e8;
+  --sidebar-primary: #caff33;
+  --sidebar-primary-foreground: #0c0c0e;
+  --sidebar-accent: color-mix(in srgb, #caff33 8%, transparent);
+  --sidebar-accent-foreground: #caff33;
+  --sidebar-border: #1e1e22;
+  --sidebar-ring: color-mix(in srgb, #caff33 25%, transparent);
 }
 
 @layer base {
@@ -133,6 +206,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
   }
   html {
     @apply font-sans;
