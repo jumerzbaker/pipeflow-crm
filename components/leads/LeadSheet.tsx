@@ -136,7 +136,8 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               </Label>
               <Input
                 id="lead-email"
-                type="email"
+                type="text"
+                inputMode="email"
                 value={form.email}
                 onChange={(e) => set('email', e.target.value)}
                 placeholder="maria@empresa.com.br"
