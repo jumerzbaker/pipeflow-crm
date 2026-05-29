@@ -99,14 +99,14 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Board Kanban com drag-and-drop funcional entre colunas (estado local, sem persistência).
 
 #### Entregas
-- [ ] Mock data: 15 negócios distribuídos nas 6 colunas
-- [ ] Board `app/(app)/pipeline/page.tsx` com scroll horizontal
-- [ ] 6 colunas fixas: Novo Lead / Contato Realizado / Proposta Enviada / Negociação / Fechado Ganho / Fechado Perdido
-- [ ] Contador de cards e soma de valor por coluna no header
-- [ ] Cards de negócio: título, valor (R$), lead vinculado, avatar do responsável, prazo
-- [ ] Coluna "Fechado Ganho" com destaque verde; "Fechado Perdido" com destaque vermelho/cinza
-- [ ] Drag-and-drop entre colunas com `@dnd-kit/core` + `@dnd-kit/sortable` (estado local com `useState`)
-- [ ] Botão "+ Novo negócio" por coluna abre sheet de criação (estático)
+- [x] Mock data: 15 negócios distribuídos nas 6 colunas
+- [x] Board `app/(app)/pipeline/page.tsx` com scroll horizontal
+- [x] 6 colunas fixas: Novo Lead / Contato Realizado / Proposta Enviada / Negociação / Fechado Ganho / Fechado Perdido
+- [x] Contador de cards e soma de valor por coluna no header
+- [x] Cards de negócio: título, valor (R$), lead vinculado, avatar do responsável, prazo
+- [x] Coluna "Fechado Ganho" com destaque verde; "Fechado Perdido" com destaque vermelho/cinza
+- [x] Drag-and-drop entre colunas com `@dnd-kit/core` + `@dnd-kit/sortable` (estado local com `useState`)
+- [x] Botão "+ Novo negócio" por coluna abre sheet de criação (estático)
 
 **Commit final:** `feat: pipeline Kanban UI com dnd-kit e mock data`
 
@@ -310,7 +310,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M2 | Design System & Shell | `feat/design-system` | ✅ Concluído |
 | M3 | Auth UI | `feat/auth-ui` | ✅ Concluído |
 | M4 | Leads UI | `feat/leads-ui` | ✅ Concluído |
-| M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ⬜ Pendente |
+| M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ✅ Concluído |
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ⬜ Pendente |
 | M7 | Dashboard UI | `feat/dashboard-ui` | ⬜ Pendente |
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ⬜ Pendente |
