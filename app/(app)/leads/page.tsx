@@ -9,7 +9,8 @@ export default function LeadsPage() {
         subtitle="Gerencie seus contatos e oportunidades"
         action={<Button>Novo Lead</Button>}
       />
-      <div className="rounded-lg border bg-white p-8 text-center text-sm text-gray-400">
+
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-600">
         Tabela de leads — em breve (M4)
       </div>
     </div>
