@@ -307,7 +307,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | # | Milestone | Branch | Status |
 |---|---|---|---|
 | M1 | Scaffold | `feat/scaffold` | ✅ Concluído |
-| M2 | Design System & Shell | `feat/design-system` | ⬜ Pendente |
+| M2 | Design System & Shell | `feat/design-system` | ✅ Concluído |
 | M3 | Auth UI | `feat/auth-ui` | ⬜ Pendente |
 | M4 | Leads UI | `feat/leads-ui` | ⬜ Pendente |
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ⬜ Pendente |
