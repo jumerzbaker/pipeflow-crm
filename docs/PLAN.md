@@ -81,14 +81,14 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Telas completas de gestão de leads com listagem, filtros, detalhe e criação.
 
 #### Entregas
-- [ ] Mock data: array de 10 leads com todos os campos (nome, e-mail, telefone, empresa, cargo, status, responsável, data)
-- [ ] Listagem `app/(app)/leads/page.tsx` — tabela com colunas: nome, empresa, status, responsável, data de criação
-- [ ] Componente `LeadsFilters` — busca por texto + filtro de status + filtro de responsável
-- [ ] Badge de status com cores distintas (Novo, Contatado, Proposta, Negociação, Ganho, Perdido)
-- [ ] Paginação estática (controles de prev/next)
-- [ ] Botão "Novo Lead" abre `LeadSheet` (shadcn/ui Sheet lateral)
-- [ ] `LeadSheet` — form com campos: nome, e-mail, telefone, empresa, cargo, status, responsável
-- [ ] Página de detalhe `app/(app)/leads/[id]/page.tsx` — perfil completo do lead + placeholder para timeline
+- [x] Mock data: array de 12 leads com todos os campos (nome, e-mail, telefone, empresa, cargo, status, responsável, data)
+- [x] Listagem `app/(app)/leads/page.tsx` — tabela com colunas: nome, empresa, status, responsável, data de criação
+- [x] Componente `LeadsFilters` — busca por texto + filtro de status + filtro de responsável
+- [x] Badge de status com cores distintas (Novo, Contatado, Proposta, Negociação, Ganho, Perdido)
+- [x] Paginação estática (controles de prev/next)
+- [x] Botão "Novo Lead" abre `LeadSheet` (shadcn/ui Sheet lateral)
+- [x] `LeadSheet` — form com campos: nome, e-mail, telefone, empresa, cargo, status, responsável
+- [x] Página de detalhe `app/(app)/leads/[id]/page.tsx` — perfil completo do lead + timeline de atividades
 
 **Commit final:** `feat: leads UI — listagem, filtros, detalhe e drawer de criação`
 
@@ -309,7 +309,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M1 | Scaffold | `feat/scaffold` | ✅ Concluído |
 | M2 | Design System & Shell | `feat/design-system` | ✅ Concluído |
 | M3 | Auth UI | `feat/auth-ui` | ✅ Concluído |
-| M4 | Leads UI | `feat/leads-ui` | ⬜ Pendente |
+| M4 | Leads UI | `feat/leads-ui` | ✅ Concluído |
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ⬜ Pendente |
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ⬜ Pendente |
 | M7 | Dashboard UI | `feat/dashboard-ui` | ⬜ Pendente |
