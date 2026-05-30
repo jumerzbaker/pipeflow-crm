@@ -134,13 +134,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Dashboard de métricas com cards, gráfico de funil e lista de negócios urgentes.
 
 #### Entregas
-- [ ] Mock data: métricas e série temporal do funil
-- [ ] Página `app/(app)/dashboard/page.tsx`
-- [ ] 4 cards de métricas com ícone, valor e variação: Total de Leads / Negócios Abertos / Valor do Pipeline / Taxa de Conversão
-- [ ] Skeleton de loading (shadcn/ui `Skeleton`) nos cards para uso futuro
-- [ ] Gráfico de funil de vendas com `recharts` (BarChart horizontal, dados por etapa)
-- [ ] Lista "Negócios com prazo próximo" — 5 itens com badge de urgência (hoje / esta semana / atrasado)
-- [ ] Página define `/dashboard` como rota padrão pós-login
+- [x] Mock data: métricas e série temporal do funil
+- [x] Página `app/(app)/dashboard/page.tsx`
+- [x] 4 cards de métricas com ícone, valor e variação: Total de Leads / Negócios Abertos / Valor do Pipeline / Taxa de Conversão
+- [x] Skeleton de loading (shadcn/ui `Skeleton`) nos cards para uso futuro
+- [x] Gráfico de funil de vendas com `recharts` (BarChart horizontal, dados por etapa)
+- [x] Lista "Negócios com prazo próximo" — 5 itens com badge de urgência (hoje / esta semana / atrasado)
+- [x] Página define `/dashboard` como rota padrão pós-login
 
 **Commit final:** `feat: dashboard UI com métricas, funil Recharts e prazo`
 
@@ -312,7 +312,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M4 | Leads UI | `feat/leads-ui` | ✅ Concluído |
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ✅ Concluído |
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ⬜ Pendente |
-| M7 | Dashboard UI | `feat/dashboard-ui` | ⬜ Pendente |
+| M7 | Dashboard UI | `feat/dashboard-ui` | ✅ Concluído |
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ⬜ Pendente |
 | M9 | Supabase Auth Real | `feat/supabase-auth` | ⬜ Pendente |
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ⬜ Pendente |
