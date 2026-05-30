@@ -48,6 +48,7 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
   const [formOpen, setFormOpen] = useState(false)
   const [type, setType] = useState<ActivityType>('ligacao')
   const [description, setDescription] = useState('')
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
   const [pending, setPending] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
@@ -55,7 +56,6 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
     if (!description.trim()) return
 
     setPending(true)
-    // Simulate async save
     setTimeout(() => {
       const newActivity: Activity = {
         id: String(nextActivityId++),
@@ -63,11 +63,12 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
         type,
         description: description.trim(),
         author: 'João Melo',
-        occurredAt: new Date().toISOString(),
+        occurredAt: new Date(`${date}T${new Date().toTimeString().slice(0, 8)}`).toISOString(),
       }
       setActivities((prev) => [newActivity, ...prev])
       setDescription('')
       setType('ligacao')
+      setDate(new Date().toISOString().split('T')[0])
       setFormOpen(false)
       setPending(false)
     }, 600)
@@ -114,6 +115,14 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
               })}
             </SelectContent>
           </Select>
+
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+            className="w-40 rounded-md border border-white/10 bg-gray-800 px-3 py-1.5 text-sm text-white [color-scheme:dark] focus:outline-none focus:ring-1 focus:ring-violet-500/50"
+          />
 
           <Textarea
             value={description}
