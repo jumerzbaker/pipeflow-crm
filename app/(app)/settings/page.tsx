@@ -387,14 +387,14 @@ export default function SettingsPage() {
             key={id}
             onClick={() => setActiveTab(id)}
             className={cn(
-              'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+              'flex flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-all sm:px-4',
               activeTab === id
                 ? 'bg-pf-surface-2 text-pf-text shadow-sm'
                 : 'text-pf-text-muted hover:text-pf-text-sec',
             )}
           >
-            <Icon className="h-4 w-4" />
-            {label}
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">{label}</span>
           </button>
         ))}
       </div>

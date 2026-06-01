@@ -174,6 +174,7 @@ export default function LandingPage() {
               </a>
             </div>
 
+
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
@@ -188,6 +189,16 @@ export default function LandingPage() {
                 Começar grátis
               </Link>
             </div>
+          </div>
+
+          {/* Mobile nav — second row, visible below md */}
+          <div className="flex items-center gap-6 border-t border-pf-border-subtle px-6 py-2 md:hidden">
+            <a href="#funcionalidades" className="text-sm text-pf-text-muted transition-colors hover:text-pf-text-sec">
+              Funcionalidades
+            </a>
+            <a href="#precos" className="text-sm text-pf-text-muted transition-colors hover:text-pf-text-sec">
+              Preços
+            </a>
           </div>
         </nav>
 
@@ -207,13 +218,13 @@ export default function LandingPage() {
 
             {/* Headline */}
             <h1 className="pf-fade-up d-1 mb-6 font-display font-extrabold leading-[1.04] tracking-tight">
-              <span className="block text-5xl text-pf-text md:text-7xl lg:text-[88px]">
+              <span className="block text-[2.25rem] text-pf-text sm:text-5xl md:text-7xl lg:text-[88px]">
                 Feche mais negócios.
               </span>
-              <span className="block text-5xl text-pf-accent md:text-7xl lg:text-[88px]">
+              <span className="block text-[2.25rem] text-pf-accent sm:text-5xl md:text-7xl lg:text-[88px]">
                 Com muito menos
               </span>
-              <span className="block text-5xl text-pf-text md:text-7xl lg:text-[88px]">
+              <span className="block text-[2.25rem] text-pf-text sm:text-5xl md:text-7xl lg:text-[88px]">
                 esforço.
               </span>
             </h1>
