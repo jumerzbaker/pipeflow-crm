@@ -153,17 +153,17 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 #### Entregas
 
 **Settings (`app/(app)/settings/page.tsx`):**
-- [ ] Layout com 3 abas: Workspace / Membros / Billing
-- [ ] Aba Workspace: form nome do workspace + upload de logo (UI estática)
-- [ ] Aba Membros: tabela de membros (nome, e-mail, papel, data de entrada) + botão "Convidar membro" (modal estático)
-- [ ] Aba Billing: card do plano atual + comparativo Free vs Pro + botão "Fazer upgrade" (estático)
+- [x] Layout com 3 abas: Workspace / Membros / Billing
+- [x] Aba Workspace: form nome do workspace + upload de logo (UI estática)
+- [x] Aba Membros: tabela de membros (nome, e-mail, papel, data de entrada) + botão "Convidar membro" (modal estático)
+- [x] Aba Billing: card do plano atual + comparativo Free vs Pro + botão "Fazer upgrade" (estático)
 
 **Landing page (`app/(landing)/page.tsx`):**
-- [ ] Seção Hero: headline impactante, subtítulo, CTA "Começar grátis" + CTA secundário "Ver demo"
-- [ ] Seção Funcionalidades: 3 blocos com ícone (Pipeline visual / Gestão de leads / Dashboard de métricas)
-- [ ] Seção Planos: cards Free e Pro com lista de features e preço (R$49/mês)
-- [ ] Footer: logo, links (funcionalidades, preços, contato) + copyright
-- [ ] Rota `/` aponta para a landing page; app em `/login`
+- [x] Seção Hero: headline impactante, subtítulo, CTA "Começar grátis" + CTA secundário "Ver demo"
+- [x] Seção Funcionalidades: 3 blocos com ícone (Pipeline visual / Gestão de leads / Dashboard de métricas)
+- [x] Seção Planos: cards Free e Pro com lista de features e preço (R$49/mês)
+- [x] Footer: logo, links (funcionalidades, preços, contato) + copyright
+- [x] Rota `/` aponta para a landing page; app em `/login`
 
 **Commit final:** `feat: settings UI, billing placeholder e landing page`
 
@@ -313,7 +313,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ✅ Concluído |
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ✅ Concluído |
 | M7 | Dashboard UI | `feat/dashboard-ui` | ✅ Concluído |
-| M8 | Settings & Landing UI | `feat/settings-landing-ui` | ⬜ Pendente |
+| M8 | Settings & Landing UI | `feat/settings-landing-ui` | ✅ Concluído |
 | M9 | Supabase Auth Real | `feat/supabase-auth` | ⬜ Pendente |
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ⬜ Pendente |
 | M11 | Leads + Pipeline Backend | `feat/leads-pipeline-backend` | ⬜ Pendente |
