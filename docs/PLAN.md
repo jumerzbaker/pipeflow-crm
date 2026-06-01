@@ -117,13 +117,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Componente de timeline de atividades integrado à página de detalhe do lead.
 
 #### Entregas
-- [ ] Mock data: 5 atividades cronológicas por lead (tipos variados)
-- [ ] Componente `ActivityTimeline` com linha do tempo vertical
-- [ ] 4 tipos de atividade com ícones distintos: Ligação / E-mail / Reunião / Nota
-- [ ] Cada item: ícone + tipo + autor + data + descrição
-- [ ] Form inline "Registrar atividade" — select de tipo, textarea de descrição, date picker
-- [ ] Botão de submit com estado de loading
-- [ ] Integrar `ActivityTimeline` na página de detalhe do lead (M4)
+- [x] Mock data: 5 atividades cronológicas por lead (tipos variados)
+- [x] Componente `ActivityTimeline` com linha do tempo vertical
+- [x] 4 tipos de atividade com ícones distintos: Ligação / E-mail / Reunião / Nota
+- [x] Cada item: ícone + tipo + autor + data + descrição
+- [x] Form inline "Registrar atividade" — select de tipo, textarea de descrição, date picker
+- [x] Botão de submit com estado de loading
+- [x] Integrar `ActivityTimeline` na página de detalhe do lead (M4)
 
 **Commit final:** `feat: timeline de atividades UI por lead`
 
@@ -134,13 +134,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Dashboard de métricas com cards, gráfico de funil e lista de negócios urgentes.
 
 #### Entregas
-- [ ] Mock data: métricas e série temporal do funil
-- [ ] Página `app/(app)/dashboard/page.tsx`
-- [ ] 4 cards de métricas com ícone, valor e variação: Total de Leads / Negócios Abertos / Valor do Pipeline / Taxa de Conversão
-- [ ] Skeleton de loading (shadcn/ui `Skeleton`) nos cards para uso futuro
-- [ ] Gráfico de funil de vendas com `recharts` (BarChart horizontal, dados por etapa)
-- [ ] Lista "Negócios com prazo próximo" — 5 itens com badge de urgência (hoje / esta semana / atrasado)
-- [ ] Página define `/dashboard` como rota padrão pós-login
+- [x] Mock data: métricas e série temporal do funil
+- [x] Página `app/(app)/dashboard/page.tsx`
+- [x] 4 cards de métricas com ícone, valor e variação: Total de Leads / Negócios Abertos / Valor do Pipeline / Taxa de Conversão
+- [x] Skeleton de loading (shadcn/ui `Skeleton`) nos cards para uso futuro
+- [x] Gráfico de funil de vendas com `recharts` (BarChart horizontal, dados por etapa)
+- [x] Lista "Negócios com prazo próximo" — 5 itens com badge de urgência (hoje / esta semana / atrasado)
+- [x] Página define `/dashboard` como rota padrão pós-login
 
 **Commit final:** `feat: dashboard UI com métricas, funil Recharts e prazo`
 
@@ -311,8 +311,8 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M3 | Auth UI | `feat/auth-ui` | ✅ Concluído |
 | M4 | Leads UI | `feat/leads-ui` | ✅ Concluído |
 | M5 | Pipeline Kanban UI | `feat/pipeline-ui` | ✅ Concluído |
-| M6 | Atividades & Timeline UI | `feat/activities-ui` | ⬜ Pendente |
-| M7 | Dashboard UI | `feat/dashboard-ui` | ⬜ Pendente |
+| M6 | Atividades & Timeline UI | `feat/activities-ui` | ✅ Concluído |
+| M7 | Dashboard UI | `feat/dashboard-ui` | ✅ Concluído |
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ⬜ Pendente |
 | M9 | Supabase Auth Real | `feat/supabase-auth` | ⬜ Pendente |
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ⬜ Pendente |

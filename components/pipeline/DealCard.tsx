@@ -2,14 +2,27 @@
 
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { CalendarDays, GripVertical } from 'lucide-react'
+import { CalendarDays, MoreHorizontal, Pencil, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Deal } from '@/types/deal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { STAGE_CONFIG } from '@/types/deal'
+import type { Deal, DealStage } from '@/types/deal'
 
 interface DealCardProps {
   deal: Deal
   stageColor: string
   isDragOverlay?: boolean
+  onEdit?: () => void
+  onMove?: (stage: DealStage) => void
 }
 
 function getDueDateStatus(dueDate: string): 'overdue' | 'urgent' | 'normal' {
@@ -35,7 +48,7 @@ function formatDate(dateStr: string): string {
   return `${day}/${month}/${year}`
 }
 
-export function DealCard({ deal, stageColor, isDragOverlay = false }: DealCardProps) {
+export function DealCard({ deal, stageColor, isDragOverlay = false, onEdit, onMove }: DealCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
     data: { deal },
@@ -46,11 +59,13 @@ export function DealCard({ deal, stageColor, isDragOverlay = false }: DealCardPr
   }
 
   const dueDateStatus = getDueDateStatus(deal.dueDate)
+  const otherStages = STAGE_CONFIG.filter((s) => s.key !== deal.stage)
 
   return (
     <div
       ref={setNodeRef}
       style={style}
+      suppressHydrationWarning
       className={cn(
         'group relative rounded-xl border bg-card p-3 transition-all duration-200 select-none',
         isDragging && !isDragOverlay ? 'opacity-40 scale-95' : '',
@@ -65,10 +80,52 @@ export function DealCard({ deal, stageColor, isDragOverlay = false }: DealCardPr
         style={{ backgroundColor: stageColor }}
       />
 
-      {/* Drag handle hint */}
-      <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-30">
-        <GripVertical className="size-3.5 text-muted-foreground" />
-      </div>
+      {/* Three-dot menu — top right */}
+      {!isDragOverlay && (onEdit || onMove) && (
+        <div
+          className="absolute right-1.5 top-1.5"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="flex h-6 w-6 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100 hover:bg-pf-surface-2"
+              aria-label="Opções do negócio"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5 text-pf-text-muted" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              {onEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="mr-2 h-3.5 w-3.5" />
+                  Editar negócio
+                </DropdownMenuItem>
+              )}
+              {onMove && otherStages.length > 0 && (
+                <>
+                  {onEdit && <DropdownMenuSeparator />}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <ArrowRight className="mr-2 h-3.5 w-3.5" />
+                      Mover para
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {otherStages.map((s) => (
+                        <DropdownMenuItem key={s.key} onClick={() => onMove(s.key)}>
+                          <span
+                            className="mr-2 h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: s.color }}
+                          />
+                          {s.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       {/* Deal title */}
       <p className="mb-2 pr-5 text-[0.82rem] font-medium leading-snug text-pf-text">

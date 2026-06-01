@@ -28,6 +28,7 @@ interface DealSheetProps {
   open: boolean
   onClose: () => void
   initialStage?: DealStage
+  dealToEdit?: Deal
   onSave: (data: DealFormData) => void
 }
 
@@ -50,12 +51,17 @@ const EMPTY_FORM = (stage: DealStage): DealFormData => ({
   stage,
 })
 
-export function DealSheet({ open, onClose, initialStage = 'novo_lead', onSave }: DealSheetProps) {
+export function DealSheet({ open, onClose, initialStage = 'novo_lead', dealToEdit, onSave }: DealSheetProps) {
   const [form, setForm] = useState<DealFormData>(EMPTY_FORM(initialStage))
 
   useEffect(() => {
-    if (open) setForm(EMPTY_FORM(initialStage))
-  }, [open, initialStage])
+    if (open) {
+      setForm(dealToEdit
+        ? { title: dealToEdit.title, value: dealToEdit.value, leadName: dealToEdit.leadName, owner: dealToEdit.owner, ownerInitials: dealToEdit.ownerInitials, dueDate: dealToEdit.dueDate, stage: dealToEdit.stage }
+        : EMPTY_FORM(initialStage)
+      )
+    }
+  }, [open, initialStage, dealToEdit])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -68,7 +74,7 @@ export function DealSheet({ open, onClose, initialStage = 'novo_lead', onSave }:
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Novo negócio</SheetTitle>
+          <SheetTitle>{dealToEdit ? 'Editar negócio' : 'Novo negócio'}</SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-2">
@@ -175,7 +181,7 @@ export function DealSheet({ open, onClose, initialStage = 'novo_lead', onSave }:
             onClick={handleSubmit}
             disabled={!form.title.trim() || !form.dueDate}
           >
-            Criar negócio
+            {dealToEdit ? 'Salvar alterações' : 'Criar negócio'}
           </Button>
         </SheetFooter>
       </SheetContent>

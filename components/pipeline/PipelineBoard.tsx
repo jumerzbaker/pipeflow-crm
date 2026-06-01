@@ -27,6 +27,7 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
   const [activeId, setActiveId] = useState<string | null>(null)
   const [sheetStage, setSheetStage] = useState<DealStage>('novo_lead')
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [dealToEdit, setDealToEdit] = useState<Deal | undefined>(undefined)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -61,18 +62,29 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
     setSheetOpen(true)
   }
 
+  function handleEditDeal(deal: Deal) {
+    setDealToEdit(deal)
+    setSheetOpen(true)
+  }
+
+  function handleMoveDeal(dealId: string, stage: DealStage) {
+    setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage } : d)))
+  }
+
   function handleSaveDeal(data: Omit<Deal, 'id'>) {
-    const newDeal: Deal = {
-      ...data,
-      id: `d${Date.now()}`,
+    if (dealToEdit) {
+      setDeals((prev) => prev.map((d) => (d.id === dealToEdit.id ? { ...d, ...data } : d)))
+    } else {
+      const newDeal: Deal = { ...data, id: `d${Date.now()}` }
+      setDeals((prev) => [...prev, newDeal])
     }
-    setDeals((prev) => [...prev, newDeal])
   }
 
   const isSheetOpen = sheetOpen || !!globalSheetOpen
 
   function handleSheetClose() {
     setSheetOpen(false)
+    setDealToEdit(undefined)
     onGlobalSheetClose?.()
   }
 
@@ -93,6 +105,8 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
               dimColor={stage.dimColor}
               deals={deals.filter((d) => d.stage === stage.key)}
               onAddDeal={handleAddDeal}
+              onEditDeal={handleEditDeal}
+              onMoveDeal={handleMoveDeal}
             />
           ))}
         </div>
@@ -112,6 +126,7 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
         open={isSheetOpen}
         onClose={handleSheetClose}
         initialStage={sheetStage}
+        dealToEdit={dealToEdit}
         onSave={handleSaveDeal}
       />
     </>
