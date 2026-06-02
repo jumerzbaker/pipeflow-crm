@@ -178,11 +178,11 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Autenticação real funcionando end-to-end com Supabase Auth e proteção de rotas via middleware.
 
 #### Entregas
-- [ ] Criar projeto Supabase e obter `SUPABASE_URL` + `ANON_KEY`
-- [ ] Instalar `@supabase/ssr` e `@supabase/supabase-js`
-- [ ] `lib/supabase/server.ts` — `createServerClient` para Server Components e Route Handlers
-- [ ] `lib/supabase/client.ts` — `createBrowserClient` para Client Components
-- [ ] `middleware.ts` — intercepta todas as rotas, protege `(app)/`, redireciona para `/login` se sem sessão
+- [x] Criar projeto Supabase e obter `SUPABASE_URL` + `ANON_KEY`
+- [x] Instalar `@supabase/ssr` e `@supabase/supabase-js`
+- [x] `lib/supabase/server.ts` — `createServerClient` para Server Components e Route Handlers
+- [x] `lib/supabase/client.ts` — `createBrowserClient` para Client Components
+- [ ] `proxy.ts` — intercepta todas as rotas, protege `(app)/`, redireciona para `/login` se sem sessão (Next.js 16: `middleware.ts` → `proxy.ts`)
 - [ ] Login, signup e logout conectados ao Supabase Auth (remover mock)
 - [ ] Route Handler `app/api/auth/callback/route.ts` para fluxo de magic link futuro
 - [ ] Variáveis `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
