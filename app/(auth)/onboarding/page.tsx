@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createWorkspace } from '@/app/actions/auth'
+import { createWorkspace } from '@/app/actions/workspace'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/auth/FieldError'
 import { Building2 } from 'lucide-react'

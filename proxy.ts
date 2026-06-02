@@ -32,8 +32,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Onboarding é acessível a usuários autenticados (sem workspace ainda)
   const isAuthRoute = request.nextUrl.pathname.match(
-    /^\/(login|signup|forgot-password|onboarding)/
+    /^\/(login|signup|forgot-password)/
   )
 
   if (isAuthRoute && user) {

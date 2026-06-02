@@ -81,26 +81,6 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
   redirect('/onboarding')
 }
 
-const OnboardingSchema = z.object({
-  workspaceName: z
-    .string()
-    .min(2, { message: 'Nome deve ter pelo menos 2 caracteres.' })
-    .max(50, { message: 'Nome deve ter no máximo 50 caracteres.' })
-    .trim(),
-})
-
-export async function createWorkspace(state: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const result = OnboardingSchema.safeParse({
-    workspaceName: formData.get('workspaceName'),
-  })
-
-  if (!result.success) {
-    return { errors: result.error.flatten().fieldErrors }
-  }
-
-  redirect('/dashboard')
-}
-
 export async function forgotPassword(state: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const result = ForgotPasswordSchema.safeParse({
     email: formData.get('email'),

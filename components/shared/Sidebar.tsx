@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const workspaceColors = [
   'bg-[#5b7fff]',
@@ -22,23 +23,12 @@ const workspaceColors = [
   'bg-[#00b4d8]',
 ] as const
 
-const workspaces = [
-  { id: '1', name: 'Acme Corp', plan: 'Pro', colorIdx: 0 },
-  { id: '2', name: 'Globex Inc.', plan: 'Free', colorIdx: 1 },
-]
-
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/leads', label: 'Leads', icon: Users },
   { href: '/pipeline', label: 'Pipeline', icon: Kanban },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ]
-
-const mockUser = {
-  name: 'João Melo',
-  email: 'joao@acme.com',
-  initials: 'JM',
-}
 
 interface SidebarProps {
   open: boolean
@@ -47,13 +37,15 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const [activeWorkspace, setActiveWorkspace] = useState(workspaces[0])
   const [switcherOpen, setSwitcherOpen] = useState(false)
+  const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace()
 
-  function handleWorkspaceSelect(ws: (typeof workspaces)[0]) {
+  function handleWorkspaceSelect(ws: typeof workspaces[0]) {
     setActiveWorkspace(ws)
     setSwitcherOpen(false)
   }
+
+  const colorIdx = (idx: number) => workspaceColors[idx % workspaceColors.length]
 
   return (
     <>
@@ -101,84 +93,90 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         {/* ── Workspace switcher ───────────────────────────────── */}
-        <div className="relative shrink-0 border-b border-pf-border-subtle p-2">
-          <button
-            onClick={() => setSwitcherOpen(!switcherOpen)}
-            className={cn(
-              'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors',
-              switcherOpen
-                ? 'bg-pf-surface-2 text-pf-text'
-                : 'text-pf-text-sec hover:bg-pf-surface-2 hover:text-pf-text',
-            )}
-          >
-            <div
+        {activeWorkspace && (
+          <div className="relative shrink-0 border-b border-pf-border-subtle p-2">
+            <button
+              onClick={() => setSwitcherOpen(!switcherOpen)}
               className={cn(
-                'flex size-6 shrink-0 items-center justify-center rounded text-white text-[11px] font-bold',
-                workspaceColors[activeWorkspace.colorIdx],
+                'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors',
+                switcherOpen
+                  ? 'bg-pf-surface-2 text-pf-text'
+                  : 'text-pf-text-sec hover:bg-pf-surface-2 hover:text-pf-text',
               )}
             >
-              {activeWorkspace.name[0]}
-            </div>
-            <div className="min-w-0 flex-1 text-left">
-              <p className="truncate text-xs font-medium text-pf-text leading-none">
-                {activeWorkspace.name}
-              </p>
-              <p className="mt-0.5 text-[10px] text-pf-text-muted leading-none font-mono">
-                Plano {activeWorkspace.plan}
-              </p>
-            </div>
-            <ChevronDown
-              className={cn(
-                'size-3.5 shrink-0 text-pf-text-muted transition-transform duration-200',
-                switcherOpen && 'rotate-180',
-              )}
-            />
-          </button>
-
-          {/* Dropdown */}
-          {switcherOpen && (
-            <div className="absolute left-2 right-2 top-full z-20 mt-1 overflow-hidden rounded-lg border border-pf-border bg-pf-surface-2 shadow-xl shadow-black/40">
-              <div className="p-1">
-                <p className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-pf-text-muted font-mono">
-                  Workspaces
+              <div
+                className={cn(
+                  'flex size-6 shrink-0 items-center justify-center rounded text-white text-[11px] font-bold',
+                  colorIdx(workspaces.indexOf(activeWorkspace)),
+                )}
+              >
+                {activeWorkspace.name[0]}
+              </div>
+              <div className="min-w-0 flex-1 text-left">
+                <p className="truncate text-xs font-medium text-pf-text leading-none">
+                  {activeWorkspace.name}
                 </p>
-                {workspaces.map((ws) => (
-                  <button
-                    key={ws.id}
-                    onClick={() => handleWorkspaceSelect(ws)}
-                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-pf-border"
-                  >
-                    <div
-                      className={cn(
-                        'flex size-6 shrink-0 items-center justify-center rounded text-white text-[11px] font-bold',
-                        workspaceColors[ws.colorIdx],
-                      )}
+                <p className="mt-0.5 text-[10px] text-pf-text-muted leading-none font-mono">
+                  Plano {activeWorkspace.plan === 'pro' ? 'Pro' : 'Free'}
+                </p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  'size-3.5 shrink-0 text-pf-text-muted transition-transform duration-200',
+                  switcherOpen && 'rotate-180',
+                )}
+              />
+            </button>
+
+            {/* Dropdown */}
+            {switcherOpen && (
+              <div className="absolute left-2 right-2 top-full z-20 mt-1 overflow-hidden rounded-lg border border-pf-border bg-pf-surface-2 shadow-xl shadow-black/40">
+                <div className="p-1">
+                  <p className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-pf-text-muted font-mono">
+                    Workspaces
+                  </p>
+                  {workspaces.map((ws, idx) => (
+                    <button
+                      key={ws.id}
+                      onClick={() => handleWorkspaceSelect(ws)}
+                      className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-pf-border"
                     >
-                      {ws.name[0]}
-                    </div>
-                    <div className="min-w-0 flex-1 text-left">
-                      <p className="truncate text-xs font-medium text-pf-text">
-                        {ws.name}
-                      </p>
-                      <p className="text-[10px] text-pf-text-muted font-mono">
-                        Plano {ws.plan}
-                      </p>
-                    </div>
-                    {ws.id === activeWorkspace.id && (
-                      <Check className="size-3.5 shrink-0 text-pf-accent" />
-                    )}
-                  </button>
-                ))}
+                      <div
+                        className={cn(
+                          'flex size-6 shrink-0 items-center justify-center rounded text-white text-[11px] font-bold',
+                          colorIdx(idx),
+                        )}
+                      >
+                        {ws.name[0]}
+                      </div>
+                      <div className="min-w-0 flex-1 text-left">
+                        <p className="truncate text-xs font-medium text-pf-text">
+                          {ws.name}
+                        </p>
+                        <p className="text-[10px] text-pf-text-muted font-mono">
+                          Plano {ws.plan === 'pro' ? 'Pro' : 'Free'}
+                        </p>
+                      </div>
+                      {ws.id === activeWorkspace.id && (
+                        <Check className="size-3.5 shrink-0 text-pf-accent" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-pf-border-subtle p-1">
+                  <Link
+                    href="/onboarding"
+                    onClick={() => setSwitcherOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs text-pf-text-sec transition-colors hover:bg-pf-border hover:text-pf-text"
+                  >
+                    <Plus className="size-3.5 shrink-0" />
+                    Novo workspace
+                  </Link>
+                </div>
               </div>
-              <div className="border-t border-pf-border-subtle p-1">
-                <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs text-pf-text-sec transition-colors hover:bg-pf-border hover:text-pf-text">
-                  <Plus className="size-3.5 shrink-0" />
-                  Novo workspace
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* ── Navigation ──────────────────────────────────────── */}
         <nav className="flex-1 overflow-y-auto p-2">
@@ -214,19 +212,19 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* ── User footer ─────────────────────────────────────── */}
         <div className="shrink-0 border-t border-pf-border-subtle p-2">
-          <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-pf-surface-2">
+          <div className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pf-surface-2 border border-pf-border text-pf-text-sec text-xs font-bold font-mono">
-              {mockUser.initials}
+              {activeWorkspace?.name?.[0] ?? '?'}
             </div>
             <div className="min-w-0 flex-1 text-left">
               <p className="truncate text-xs font-medium text-pf-text">
-                {mockUser.name}
+                {activeWorkspace?.name ?? 'Workspace'}
               </p>
               <p className="truncate text-[10px] text-pf-text-muted font-mono">
-                {mockUser.email}
+                {activeWorkspace?.role === 'admin' ? 'Admin' : 'Membro'}
               </p>
             </div>
-          </button>
+          </div>
         </div>
       </aside>
     </>

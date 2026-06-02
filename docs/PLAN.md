@@ -196,13 +196,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Estrutura de dados multi-empresa com isolamento total via RLS e workspace switcher funcional.
 
 #### Entregas
-- [ ] Migration `001_workspaces.sql`: tabela `workspaces` (id, name, slug, plan, stripe_customer_id, created_at)
-- [ ] Migration `002_workspace_members.sql`: tabela `workspace_members` (workspace_id, user_id, role, invited_at, joined_at)
-- [ ] RLS policies: membros só leem/escrevem no próprio workspace
-- [ ] Onboarding pós-cadastro: se usuário não tem workspace, redirecionar para `/onboarding` e criar o primeiro
-- [ ] Workspace switcher conectado ao banco (busca workspaces reais do usuário autenticado)
-- [ ] Context/hook `useWorkspace` para propagar `workspace_id` ativo pelo app
-- [ ] `supabase gen types typescript > types/database.ts`
+- [x] Migration `001_workspaces.sql`: tabela `workspaces` (id, name, slug, plan, stripe_customer_id, created_at)
+- [x] Migration `002_workspace_members.sql`: tabela `workspace_members` (workspace_id, user_id, role, invited_at, joined_at)
+- [x] RLS policies: membros só leem/escrevem no próprio workspace
+- [x] Onboarding pós-cadastro: se usuário não tem workspace, redirecionar para `/onboarding` e criar o primeiro
+- [x] Workspace switcher conectado ao banco (busca workspaces reais do usuário autenticado)
+- [x] Context/hook `useWorkspace` para propagar `workspace_id` ativo pelo app
+- [x] `supabase gen types typescript > types/database.ts`
 
 **Commit final:** `feat: schema multi-tenant, RLS e workspace switcher funcional`
 
@@ -315,7 +315,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M7 | Dashboard UI | `feat/dashboard-ui` | ✅ Concluído |
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ✅ Concluído |
 | M9 | Supabase Auth Real | `feat/supabase-auth` | ✅ Concluído |
-| M10 | Multi-tenant + RLS | `feat/multi-tenant` | ⬜ Pendente |
+| M10 | Multi-tenant + RLS | `feat/multi-tenant` | ✅ Concluído |
 | M11 | Leads + Pipeline Backend | `feat/leads-pipeline-backend` | ⬜ Pendente |
 | M12 | Atividades + Dashboard Backend | `feat/activities-dashboard-backend` | ⬜ Pendente |
 | M13 | Convites | `feat/invites` | ⬜ Pendente |
