@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import * as z from 'zod'
+import { getSupabaseServerClient } from '@/lib/supabase/server'
 
 const LoginSchema = z.object({
   email: z.string().email({ message: 'E-mail inválido.' }).trim(),
@@ -40,6 +41,16 @@ export async function login(state: AuthFormState, formData: FormData): Promise<A
     return { errors: result.error.flatten().fieldErrors }
   }
 
+  const supabase = await getSupabaseServerClient()
+  const { error } = await supabase.auth.signInWithPassword({
+    email: result.data.email,
+    password: result.data.password,
+  })
+
+  if (error) {
+    return { errors: { email: ['E-mail ou senha incorretos.'] } }
+  }
+
   redirect('/dashboard')
 }
 
@@ -52,6 +63,19 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
 
   if (!result.success) {
     return { errors: result.error.flatten().fieldErrors }
+  }
+
+  const supabase = await getSupabaseServerClient()
+  const { error } = await supabase.auth.signUp({
+    email: result.data.email,
+    password: result.data.password,
+    options: {
+      data: { name: result.data.name },
+    },
+  })
+
+  if (error) {
+    return { errors: { email: [error.message] } }
   }
 
   redirect('/onboarding')
@@ -86,5 +110,16 @@ export async function forgotPassword(state: AuthFormState, formData: FormData): 
     return { errors: result.error.flatten().fieldErrors }
   }
 
+  const supabase = await getSupabaseServerClient()
+  await supabase.auth.resetPasswordForEmail(result.data.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/reset-password`,
+  })
+
   return { message: 'Se esse e-mail estiver cadastrado, você receberá as instruções em breve.' }
+}
+
+export async function logout(): Promise<void> {
+  const supabase = await getSupabaseServerClient()
+  await supabase.auth.signOut()
+  redirect('/login')
 }
