@@ -182,10 +182,10 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 - [x] Instalar `@supabase/ssr` e `@supabase/supabase-js`
 - [x] `lib/supabase/server.ts` — `createServerClient` para Server Components e Route Handlers
 - [x] `lib/supabase/client.ts` — `createBrowserClient` para Client Components
-- [ ] `proxy.ts` — intercepta todas as rotas, protege `(app)/`, redireciona para `/login` se sem sessão (Next.js 16: `middleware.ts` → `proxy.ts`)
-- [ ] Login, signup e logout conectados ao Supabase Auth (remover mock)
-- [ ] Route Handler `app/api/auth/callback/route.ts` para fluxo de magic link futuro
-- [ ] Variáveis `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [x] `proxy.ts` — intercepta todas as rotas, protege `(app)/`, redireciona para `/login` se sem sessão (Next.js 16: `middleware.ts` → `proxy.ts`)
+- [x] Login, signup e logout conectados ao Supabase Auth (remover mock)
+- [x] Route Handler `app/api/auth/callback/route.ts` para fluxo de magic link futuro
+- [x] Variáveis `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 **Commit final:** `feat: Supabase Auth real, middleware de sessão e rotas protegidas`
 
@@ -314,7 +314,7 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M6 | Atividades & Timeline UI | `feat/activities-ui` | ✅ Concluído |
 | M7 | Dashboard UI | `feat/dashboard-ui` | ✅ Concluído |
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ✅ Concluído |
-| M9 | Supabase Auth Real | `feat/supabase-auth` | ⬜ Pendente |
+| M9 | Supabase Auth Real | `feat/supabase-auth` | ✅ Concluído |
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ⬜ Pendente |
 | M11 | Leads + Pipeline Backend | `feat/leads-pipeline-backend` | ⬜ Pendente |
 | M12 | Atividades + Dashboard Backend | `feat/activities-dashboard-backend` | ⬜ Pendente |
