@@ -18,8 +18,10 @@ export async function sendInviteEmail({
 }): Promise<{ error?: string }> {
   const roleLabel = role === 'admin' ? 'Administrador' : 'Membro'
 
-  const { error } = await resend.emails.send({
-    from: 'PipeFlow CRM <onboarding@resend.dev>',
+  const fromAddress = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+
+  const { data, error } = await resend.emails.send({
+    from: `PipeFlow CRM <${fromAddress}>`,
     to,
     subject: `Você foi convidado para ${workspaceName} no PipeFlow`,
     html: `
@@ -95,6 +97,7 @@ export async function sendInviteEmail({
     `.trim(),
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: error.message ?? 'Falha no envio de e-mail.' }
+  if (!data?.id) return { error: 'Resend não retornou confirmação de envio.' }
   return {}
 }

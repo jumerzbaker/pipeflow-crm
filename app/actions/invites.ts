@@ -212,6 +212,31 @@ export async function removeMember(
   if (currentUser.id === userId) return { error: 'Você não pode remover a si mesmo.' }
 
   const admin = getSupabaseAdminClient()
+
+  // Verify caller is admin of this workspace
+  const { data: callerMember } = await admin
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', currentUser.id)
+    .maybeSingle()
+
+  if (callerMember?.role !== 'admin') {
+    return { error: 'Apenas administradores podem remover membros.' }
+  }
+
+  // Prevent removing another admin
+  const { data: targetMember } = await admin
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (targetMember?.role === 'admin') {
+    return { error: 'Não é possível remover um administrador do workspace.' }
+  }
+
   const { error } = await admin
     .from('workspace_members')
     .delete()
