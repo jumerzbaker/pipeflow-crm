@@ -22,15 +22,10 @@ as $$
   );
 $$;
 
--- RLS em workspace_members (self-referential: usa subquery direta)
+-- RLS em workspace_members: usa is_workspace_member() (SECURITY DEFINER) para evitar recursão infinita
 create policy "Membros leem membros do próprio workspace"
   on workspace_members for select
-  using (
-    workspace_id in (
-      select workspace_id from workspace_members
-      where user_id = auth.uid()
-    )
-  );
+  using (is_workspace_member(workspace_id));
 
 create policy "Usuário insere a si mesmo"
   on workspace_members for insert

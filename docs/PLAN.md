@@ -189,6 +189,13 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 
 **Commit final:** `feat: Supabase Auth real, middleware de sessão e rotas protegidas`
 
+**Fixes (revisão pós-entrega):**
+- `signup` não verificava `data.session` → redirecionava para `/onboarding` mesmo sem sessão ativa
+- Adicionada página `/verify-email` para fluxo com confirmação de e-mail pendente
+- `emailRedirectTo` agora aponta para `/onboarding` via callback
+- Mensagem de login melhorada para erro "Email not confirmed"
+- `getSupabaseAdminClient()` adicionado em `lib/supabase/server.ts` para operações server-side que exigem bypass de RLS
+
 ---
 
 ### M10 — Multi-tenant Schema + RLS
@@ -205,6 +212,11 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 - [x] `supabase gen types typescript > types/database.ts`
 
 **Commit final:** `feat: schema multi-tenant, RLS e workspace switcher funcional`
+
+**Fixes (revisão pós-entrega):**
+- Policy SELECT em `workspace_members` causava recursão infinita (self-referential subquery) → substituída por `is_workspace_member()` (`SECURITY DEFINER`)
+- Policy INSERT em `workspaces` sem `TO authenticated` — `auth.uid() IS NOT NULL` é a guarda correta para qualquer role com JWT
+- `createWorkspace` usa `getSupabaseAdminClient()` para os INSERTs: cliente SSR não repassa JWT ao PostgREST em Server Actions
 
 ---
 
