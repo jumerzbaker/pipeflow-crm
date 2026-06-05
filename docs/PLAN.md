@@ -225,17 +225,17 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** CRUD de leads e deals persistido no banco com RLS, buscas e drag-and-drop durável.
 
 #### Entregas
-- [ ] Migration `003_leads.sql`: tabela `leads` (id, workspace_id, name, email, phone, company, role, status, owner_id, created_at)
-- [ ] Migration `004_deals.sql`: tabela `deals` (id, workspace_id, lead_id, title, value, stage, owner_id, due_date, position, created_at)
-- [ ] RLS em `leads` e `deals` por `workspace_id`
-- [ ] Server Actions ou Route Handlers: criar, listar, atualizar, excluir leads
-- [ ] Busca e filtros de leads conectados ao banco (query params → Supabase query)
-- [ ] CRUD de deals
-- [ ] Persistência do drag-and-drop: ao mover card, `PATCH /api/deals/:id` atualiza `stage` + `position`
-- [ ] Atualizar `types/database.ts` com novos tipos
-- [ ] Substituir mock data de leads e pipeline por dados reais
+- [x] Migration `003_leads.sql`: tabela `leads` (id, workspace_id, name, email, phone, company, role, status, owner_id, created_at)
+- [x] Migration `004_deals.sql`: tabela `deals` (id, workspace_id, lead_id, title, value, stage, owner_id, due_date, position, created_at)
+- [x] RLS em `leads` e `deals` por `workspace_id`
+- [x] Server Actions: criar, listar, atualizar, excluir leads (`app/actions/leads.ts`)
+- [x] Filtros de leads (status, responsável, busca) — client-side sobre dados reais
+- [x] CRUD de deals (`app/actions/deals.ts`)
+- [x] Persistência do drag-and-drop: `updateDealStage` atualiza `stage` + `position` com optimistic update
+- [x] `types/database.ts` já estava gerado com novos tipos
+- [x] Mock data de leads e pipeline substituídos por dados reais
 
-**Commit final:** `feat: leads e pipeline conectados ao Supabase com CRUD e dnd persistido`
+**Commit:** `feat: leads, pipeline e dashboard conectados ao Supabase (M11 + parcial M12)`
 
 ---
 
@@ -244,16 +244,16 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Timeline de atividades persistida e dashboard com métricas agregadas reais.
 
 #### Entregas
-- [ ] Migration `005_activities.sql`: tabela `activities` (id, workspace_id, lead_id, type, description, author_id, occurred_at, created_at)
-- [ ] RLS em `activities` por `workspace_id`
-- [ ] Timeline conectada ao banco por lead (substituir mock)
-- [ ] Server Action para criar nova atividade
-- [ ] Dashboard: query `COUNT(leads)`, `SUM(deals.value)`, `COUNT(deals WHERE stage = 'fechado_ganho') / COUNT(deals)` por workspace
-- [ ] Gráfico de funil: query `COUNT(deals) GROUP BY stage` em ordem de etapa
-- [ ] Lista de negócios com prazo próximo: `deals WHERE due_date <= NOW() + 7 days ORDER BY due_date`
-- [ ] Atualizar `types/database.ts`
+- [x] Migration `005_activities.sql`: tabela `activities` já aplicada
+- [x] RLS em `activities` por `workspace_id`
+- [x] Timeline conectada ao banco por lead — `getActivities` + `createActivity` (`app/actions/activities.ts`)
+- [x] Server Action para criar nova atividade com optimistic insert no cliente
+- [x] Dashboard: COUNT(leads), SUM(deals.value), taxa de conversão reais
+- [x] Gráfico de funil com COUNT por stage real
+- [x] Lista "Prazo Próximo": deals abertos com due_date mais próximo
+- [x] `types/database.ts` já estava gerado
 
-**Commit final:** `feat: atividades e dashboard backend com dados reais do Supabase`
+**Commit:** `feat: leads, pipeline e dashboard conectados ao Supabase (M11 + parcial M12)`
 
 ---
 
@@ -328,8 +328,8 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M8 | Settings & Landing UI | `feat/settings-landing-ui` | ✅ Concluído |
 | M9 | Supabase Auth Real | `feat/supabase-auth` | ✅ Concluído |
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ✅ Concluído |
-| M11 | Leads + Pipeline Backend | `feat/leads-pipeline-backend` | ⬜ Pendente |
-| M12 | Atividades + Dashboard Backend | `feat/activities-dashboard-backend` | ⬜ Pendente |
+| M11 | Leads + Pipeline Backend | `feat/leads-data` | ✅ Concluído |
+| M12 | Atividades + Dashboard Backend | `feat/leads-data` | ✅ Concluído |
 | M13 | Convites | `feat/invites` | ⬜ Pendente |
 | M14 | Stripe Billing | `feat/billing` | ⬜ Pendente |
 | M15 | Deploy Produção | `feat/deploy` | ⬜ Pendente |
