@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, Building2, Briefcase, Calendar, User } from 'lucide-react'
-import { PageHeader } from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/leads/StatusBadge'
 import { ActivityTimeline } from '@/components/leads/ActivityTimeline'
-import { MOCK_LEADS, MOCK_ACTIVITIES } from '@/lib/mock/leads'
+import { getUserWorkspaces } from '@/app/actions/workspace'
+import { getLeadById } from '@/app/actions/leads'
+import { getActivities } from '@/app/actions/activities'
 
 function formatDate(iso: string) {
   const [y, m, d] = iso.split('-')
@@ -17,16 +18,20 @@ export default async function LeadDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const lead = MOCK_LEADS.find((l) => l.id === id)
-  if (!lead) notFound()
 
-  const activities = MOCK_ACTIVITIES.filter((a) => a.leadId === id).sort(
-    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
-  )
+  const workspaces = await getUserWorkspaces()
+  if (!workspaces.length) redirect('/onboarding')
+
+  const workspaceId = workspaces[0].id
+  const [lead, activities] = await Promise.all([
+    getLeadById(workspaceId, id),
+    getActivities(workspaceId, id),
+  ])
+
+  if (!lead) notFound()
 
   return (
     <div className="space-y-6">
-      {/* Back link + header */}
       <div className="space-y-4">
         <Link
           href="/leads"
@@ -50,21 +55,23 @@ export default async function LeadDetailPage({
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Left column — lead info */}
         <div className="space-y-4 lg:col-span-1">
-          {/* Contact card */}
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
               Informações de contato
             </h2>
             <ul className="space-y-3">
               <InfoRow icon={<Mail className="size-4" />} label="E-mail">
-                <a
-                  href={`mailto:${lead.email}`}
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
-                >
-                  {lead.email}
-                </a>
+                {lead.email ? (
+                  <a
+                    href={`mailto:${lead.email}`}
+                    className="text-violet-400 transition-colors hover:text-violet-300"
+                  >
+                    {lead.email}
+                  </a>
+                ) : (
+                  <span className="text-gray-600">—</span>
+                )}
               </InfoRow>
               {lead.phone && (
                 <InfoRow icon={<Phone className="size-4" />} label="Telefone">
@@ -80,7 +87,7 @@ export default async function LeadDetailPage({
                 </InfoRow>
               )}
               <InfoRow icon={<User className="size-4" />} label="Responsável">
-                {lead.owner}
+                {lead.owner || <span className="text-gray-600">—</span>}
               </InfoRow>
               <InfoRow icon={<Calendar className="size-4" />} label="Criado em">
                 {formatDate(lead.createdAt)}
@@ -88,7 +95,6 @@ export default async function LeadDetailPage({
             </ul>
           </div>
 
-          {/* Notes */}
           {lead.notes && (
             <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -99,9 +105,12 @@ export default async function LeadDetailPage({
           )}
         </div>
 
-        {/* Right column — timeline */}
         <div className="lg:col-span-2">
-          <ActivityTimeline leadId={id} initialActivities={activities} />
+          <ActivityTimeline
+            leadId={id}
+            workspaceId={workspaceId}
+            initialActivities={activities}
+          />
         </div>
       </div>
     </div>

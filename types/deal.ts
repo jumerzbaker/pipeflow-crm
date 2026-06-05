@@ -10,11 +10,14 @@ export interface Deal {
   id: string
   title: string
   value: number
+  stage: DealStage
+  position: number
+  leadId: string | null
   leadName: string
+  ownerId: string | null
   owner: string
   ownerInitials: string
   dueDate: string
-  stage: DealStage
 }
 
 export interface StageConfig {

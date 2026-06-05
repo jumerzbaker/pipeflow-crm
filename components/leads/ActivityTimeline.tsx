@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Phone, Mail, Users, FileText, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { createActivity } from '@/app/actions/activities'
 import type { Activity, ActivityType } from '@/types/lead'
 
 const ACTIVITY_CONFIG: Record<
@@ -36,42 +37,57 @@ function formatDateTime(iso: string) {
   })
 }
 
-let nextActivityId = 100
-
 interface ActivityTimelineProps {
   leadId: string
+  workspaceId: string
   initialActivities: Activity[]
 }
 
-export function ActivityTimeline({ leadId, initialActivities }: ActivityTimelineProps) {
+export function ActivityTimeline({ leadId, workspaceId, initialActivities }: ActivityTimelineProps) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities)
   const [formOpen, setFormOpen] = useState(false)
   const [type, setType] = useState<ActivityType>('ligacao')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
-  const [pending, setPending] = useState(false)
+  const [serverError, setServerError] = useState('')
+  const [isPending, startTransition] = useTransition()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!description.trim()) return
 
-    setPending(true)
-    setTimeout(() => {
+    const occurred_at = new Date(
+      `${date}T${new Date().toTimeString().slice(0, 8)}`,
+    ).toISOString()
+
+    startTransition(async () => {
+      const result = await createActivity(workspaceId, leadId, {
+        type,
+        description: description.trim(),
+        occurred_at,
+      })
+
+      if (result.error) {
+        setServerError(result.error)
+        return
+      }
+
+      // optimistic insert — the page will also refresh on next navigation
       const newActivity: Activity = {
-        id: String(nextActivityId++),
+        id: `tmp-${Date.now()}`,
         leadId,
         type,
         description: description.trim(),
-        author: 'João Melo',
-        occurredAt: new Date(`${date}T${new Date().toTimeString().slice(0, 8)}`).toISOString(),
+        author: 'Você',
+        occurredAt: occurred_at,
       }
       setActivities((prev) => [newActivity, ...prev])
       setDescription('')
       setType('ligacao')
       setDate(new Date().toISOString().split('T')[0])
       setFormOpen(false)
-      setPending(false)
-    }, 600)
+      setServerError('')
+    })
   }
 
   return (
@@ -91,12 +107,15 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
         </Button>
       </div>
 
-      {/* Inline form */}
       {formOpen && (
         <form
           onSubmit={handleSubmit}
           className="mb-6 space-y-3 rounded-lg border border-gray-800 bg-gray-800/50 p-4"
         >
+          {serverError && (
+            <p className="text-xs text-rose-400">{serverError}</p>
+          )}
+
           <Select value={type} onValueChange={(v) => setType(v as ActivityType)}>
             <SelectTrigger className="w-40 border-white/10 bg-gray-800 text-sm text-white focus:ring-violet-500/50">
               <SelectValue />
@@ -146,10 +165,10 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
             <Button
               type="submit"
               size="sm"
-              disabled={pending || !description.trim()}
+              disabled={isPending || !description.trim()}
               className="bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50"
             >
-              {pending ? (
+              {isPending ? (
                 <>
                   <Loader2 className="mr-1.5 size-3.5 animate-spin" />
                   Salvando…
@@ -162,7 +181,6 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
         </form>
       )}
 
-      {/* Timeline */}
       {activities.length === 0 ? (
         <div className="py-10 text-center text-sm text-gray-600">
           Nenhuma atividade registrada ainda.
@@ -176,19 +194,14 @@ export function ActivityTimeline({ leadId, initialActivities }: ActivityTimeline
 
             return (
               <li key={activity.id} className="relative flex gap-3 pb-6">
-                {/* Vertical line */}
                 {!isLast && (
                   <div className="absolute left-[14px] top-7 bottom-0 w-px bg-gray-800" />
                 )}
-
-                {/* Icon */}
                 <div
                   className={`relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ${cfg.bg}`}
                 >
                   <Icon className={`size-3.5 ${cfg.color}`} />
                 </div>
-
-                {/* Content */}
                 <div className="min-w-0 flex-1 pt-0.5">
                   <div className="flex flex-wrap items-baseline gap-x-2">
                     <span className="text-xs font-medium text-gray-300">{cfg.label}</span>

@@ -91,3 +91,29 @@ export async function getUserWorkspaces(): Promise<
     role: row.role,
   }))
 }
+
+export async function getWorkspaceMembers(
+  workspaceId: string,
+): Promise<{ id: string; name: string }[]> {
+  const supabase = await getSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const admin = getSupabaseAdminClient()
+  const { data: members } = await admin
+    .from('workspace_members')
+    .select('user_id')
+    .eq('workspace_id', workspaceId)
+
+  if (!members?.length) return []
+
+  const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 })
+  const memberIds = new Set(members.map((m) => m.user_id))
+
+  return users
+    .filter((u) => memberIds.has(u.id))
+    .map((u) => ({
+      id: u.id,
+      name: (u.user_metadata?.full_name as string) || u.email || 'Usuário',
+    }))
+}
