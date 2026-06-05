@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -18,56 +18,109 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MOCK_LEADS, MOCK_OWNERS } from '@/lib/mock/leads'
+import { Loader2 } from 'lucide-react'
+import { createDeal, updateDeal } from '@/app/actions/deals'
 import { STAGE_CONFIG } from '@/types/deal'
 import type { Deal, DealStage } from '@/types/deal'
 
-type DealFormData = Omit<Deal, 'id'>
+interface AvailableLead {
+  id: string
+  name: string
+  company: string
+}
+
+interface Member {
+  id: string
+  name: string
+}
+
+interface DealFormState {
+  title: string
+  value: number | ''
+  leadId: string
+  ownerId: string
+  dueDate: string
+  stage: DealStage
+}
 
 interface DealSheetProps {
   open: boolean
   onClose: () => void
   initialStage?: DealStage
   dealToEdit?: Deal
-  onSave: (data: DealFormData) => void
+  availableLeads: AvailableLead[]
+  members: Member[]
+  workspaceId: string
+  onSuccess: () => void
 }
 
-function getOwnerInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-}
+export function DealSheet({
+  open,
+  onClose,
+  initialStage = 'novo_lead',
+  dealToEdit,
+  availableLeads,
+  members,
+  workspaceId,
+  onSuccess,
+}: DealSheetProps) {
+  const [isPending, startTransition] = useTransition()
+  const [serverError, setServerError] = useState('')
 
-const EMPTY_FORM = (stage: DealStage): DealFormData => ({
-  title: '',
-  value: 0,
-  leadName: MOCK_LEADS[0].name,
-  owner: MOCK_OWNERS[0],
-  ownerInitials: getOwnerInitials(MOCK_OWNERS[0]),
-  dueDate: '',
-  stage,
-})
+  const emptyForm = (stage: DealStage): DealFormState => ({
+    title: '',
+    value: '',
+    leadId: availableLeads[0]?.id ?? '',
+    ownerId: members[0]?.id ?? '',
+    dueDate: '',
+    stage,
+  })
 
-export function DealSheet({ open, onClose, initialStage = 'novo_lead', dealToEdit, onSave }: DealSheetProps) {
-  const [form, setForm] = useState<DealFormData>(EMPTY_FORM(initialStage))
+  const [form, setForm] = useState<DealFormState>(emptyForm(initialStage))
 
   useEffect(() => {
     if (open) {
-      setForm(dealToEdit
-        ? { title: dealToEdit.title, value: dealToEdit.value, leadName: dealToEdit.leadName, owner: dealToEdit.owner, ownerInitials: dealToEdit.ownerInitials, dueDate: dealToEdit.dueDate, stage: dealToEdit.stage }
-        : EMPTY_FORM(initialStage)
+      setServerError('')
+      setForm(
+        dealToEdit
+          ? {
+              title: dealToEdit.title,
+              value: dealToEdit.value,
+              leadId: dealToEdit.leadId ?? availableLeads[0]?.id ?? '',
+              ownerId: dealToEdit.ownerId ?? members[0]?.id ?? '',
+              dueDate: dealToEdit.dueDate,
+              stage: dealToEdit.stage,
+            }
+          : emptyForm(initialStage),
       )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialStage, dealToEdit])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim() || !form.dueDate) return
-    onSave(form)
-    onClose()
+
+    const payload = {
+      title: form.title.trim(),
+      value: Number(form.value) || 0,
+      stage: form.stage,
+      lead_id: form.leadId || null,
+      owner_id: form.ownerId || null,
+      due_date: form.dueDate || null,
+    }
+
+    startTransition(async () => {
+      const result = dealToEdit
+        ? await updateDeal(workspaceId, dealToEdit.id, payload)
+        : await createDeal(workspaceId, payload)
+
+      if (result.error) {
+        setServerError(result.error)
+      } else {
+        onSuccess()
+      }
+    })
   }
 
   return (
@@ -77,7 +130,16 @@ export function DealSheet({ open, onClose, initialStage = 'novo_lead', dealToEdi
           <SheetTitle>{dealToEdit ? 'Editar negócio' : 'Novo negócio'}</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-2"
+        >
+          {serverError && (
+            <p className="rounded-md bg-rose-500/10 px-3 py-2 text-xs text-rose-400">
+              {serverError}
+            </p>
+          )}
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="deal-title">Título do negócio</Label>
             <Input
@@ -96,50 +158,54 @@ export function DealSheet({ open, onClose, initialStage = 'novo_lead', dealToEdi
               type="number"
               min={0}
               placeholder="0"
-              value={form.value || ''}
-              onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
+              value={form.value}
+              onChange={(e) =>
+                setForm({ ...form, value: e.target.value === '' ? '' : Number(e.target.value) })
+              }
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Lead vinculado</Label>
-            <Select
-              value={form.leadName}
-              onValueChange={(v) => v && setForm({ ...form, leadName: v })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MOCK_LEADS.map((lead) => (
-                  <SelectItem key={lead.id} value={lead.name}>
-                    {lead.name} — {lead.company}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {availableLeads.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Lead vinculado</Label>
+              <Select
+                value={form.leadId}
+                onValueChange={(v) => v && setForm({ ...form, leadId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableLeads.map((lead) => (
+                    <SelectItem key={lead.id} value={lead.id}>
+                      {lead.name} — {lead.company}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Responsável</Label>
-            <Select
-              value={form.owner}
-              onValueChange={(v) =>
-                v && setForm({ ...form, owner: v, ownerInitials: getOwnerInitials(v) })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MOCK_OWNERS.map((owner) => (
-                  <SelectItem key={owner} value={owner}>
-                    {owner}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {members.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Responsável</Label>
+              <Select
+                value={form.ownerId}
+                onValueChange={(v) => v && setForm({ ...form, ownerId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="deal-due">Prazo</Label>
@@ -173,15 +239,24 @@ export function DealSheet({ open, onClose, initialStage = 'novo_lead', dealToEdi
         </form>
 
         <SheetFooter className="border-t border-border pt-4">
-          <Button variant="ghost" onClick={onClose} type="button">
+          <Button variant="ghost" onClick={onClose} type="button" disabled={isPending}>
             Cancelar
           </Button>
           <Button
             type="submit"
             onClick={handleSubmit}
-            disabled={!form.title.trim() || !form.dueDate}
+            disabled={isPending || !form.title.trim() || !form.dueDate}
           >
-            {dealToEdit ? 'Salvar alterações' : 'Criar negócio'}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                Salvando…
+              </>
+            ) : dealToEdit ? (
+              'Salvar alterações'
+            ) : (
+              'Criar negócio'
+            )}
           </Button>
         </SheetFooter>
       </SheetContent>

@@ -10,9 +10,9 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
-import type { FUNNEL_DATA } from '@/lib/mock/dashboard'
-
 const STAGE_COLORS = ['#5b7fff', '#a78bfa', '#caff33', '#ff6b35', '#2ed573']
+
+export type FunnelDataPoint = { stage: string; count: number; value: number }
 
 function formatBRL(value: number) {
   return new Intl.NumberFormat('pt-BR', {
@@ -42,7 +42,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 }
 
 interface FunnelChartProps {
-  data: typeof FUNNEL_DATA
+  data: FunnelDataPoint[]
 }
 
 export function FunnelChart({ data }: FunnelChartProps) {

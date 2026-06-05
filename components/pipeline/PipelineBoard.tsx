@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   DndContext,
   DragOverlay,
@@ -10,29 +11,53 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { MOCK_DEALS } from '@/lib/mock/deals'
 import { STAGE_CONFIG } from '@/types/deal'
 import type { Deal, DealStage } from '@/types/deal'
 import { PipelineColumn } from './PipelineColumn'
 import { DealCard } from './DealCard'
 import { DealSheet } from './DealSheet'
+import { updateDealStage } from '@/app/actions/deals'
 
-interface PipelineBoardProps {
-  globalSheetOpen?: boolean
-  onGlobalSheetClose?: () => void
+interface AvailableLead {
+  id: string
+  name: string
+  company: string
 }
 
-export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineBoardProps) {
-  const [deals, setDeals] = useState<Deal[]>(MOCK_DEALS)
+interface Member {
+  id: string
+  name: string
+}
+
+interface PipelineBoardProps {
+  initialDeals: Deal[]
+  availableLeads: AvailableLead[]
+  members: Member[]
+  workspaceId: string
+}
+
+export function PipelineBoard({
+  initialDeals,
+  availableLeads,
+  members,
+  workspaceId,
+}: PipelineBoardProps) {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
+
+  const [deals, setDeals] = useState<Deal[]>(initialDeals)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [sheetStage, setSheetStage] = useState<DealStage>('novo_lead')
   const [sheetOpen, setSheetOpen] = useState(false)
   const [dealToEdit, setDealToEdit] = useState<Deal | undefined>(undefined)
 
+  // sync when server data changes after router.refresh()
+  useEffect(() => {
+    setDeals(initialDeals)
+  }, [initialDeals])
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   )
 
   const activeDeal = activeId ? deals.find((d) => d.id === activeId) : null
@@ -47,18 +72,38 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     setActiveId(null)
-
     if (!over) return
+
     const newStage = over.id as DealStage
     const dealId = String(active.id)
+    const deal = deals.find((d) => d.id === dealId)
+    if (!deal || deal.stage === newStage) return
+
+    // optimistic update
+    const stageDeals = deals.filter((d) => d.stage === newStage)
+    const newPosition = stageDeals.length
 
     setDeals((prev) =>
-      prev.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d)),
+      prev.map((d) =>
+        d.id === dealId ? { ...d, stage: newStage, position: newPosition } : d,
+      ),
     )
+
+    // persist
+    startTransition(async () => {
+      const result = await updateDealStage(workspaceId, dealId, newStage, newPosition)
+      if (result.error) {
+        // revert on failure
+        setDeals((prev) =>
+          prev.map((d) => (d.id === dealId ? { ...d, stage: deal.stage, position: deal.position } : d)),
+        )
+      }
+    })
   }
 
   function handleAddDeal(stage: DealStage) {
     setSheetStage(stage)
+    setDealToEdit(undefined)
     setSheetOpen(true)
   }
 
@@ -68,33 +113,43 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
   }
 
   function handleMoveDeal(dealId: string, stage: DealStage) {
-    setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage } : d)))
-  }
+    const deal = deals.find((d) => d.id === dealId)
+    if (!deal) return
 
-  function handleSaveDeal(data: Omit<Deal, 'id'>) {
-    if (dealToEdit) {
-      setDeals((prev) => prev.map((d) => (d.id === dealToEdit.id ? { ...d, ...data } : d)))
-    } else {
-      const newDeal: Deal = { ...data, id: `d${Date.now()}` }
-      setDeals((prev) => [...prev, newDeal])
-    }
-  }
+    const stageDeals = deals.filter((d) => d.stage === stage)
+    const newPosition = stageDeals.length
 
-  const isSheetOpen = sheetOpen || !!globalSheetOpen
+    setDeals((prev) =>
+      prev.map((d) =>
+        d.id === dealId ? { ...d, stage, position: newPosition } : d,
+      ),
+    )
+
+    startTransition(async () => {
+      const result = await updateDealStage(workspaceId, dealId, stage, newPosition)
+      if (result.error) {
+        setDeals((prev) =>
+          prev.map((d) =>
+            d.id === dealId ? { ...d, stage: deal.stage, position: deal.position } : d,
+          ),
+        )
+      }
+    })
+  }
 
   function handleSheetClose() {
     setSheetOpen(false)
     setDealToEdit(undefined)
-    onGlobalSheetClose?.()
+  }
+
+  function handleSheetSuccess() {
+    handleSheetClose()
+    router.refresh()
   }
 
   return (
     <>
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {STAGE_CONFIG.map((stage) => (
             <PipelineColumn
@@ -123,11 +178,14 @@ export function PipelineBoard({ globalSheetOpen, onGlobalSheetClose }: PipelineB
       </DndContext>
 
       <DealSheet
-        open={isSheetOpen}
+        open={sheetOpen}
         onClose={handleSheetClose}
         initialStage={sheetStage}
         dealToEdit={dealToEdit}
-        onSave={handleSaveDeal}
+        availableLeads={availableLeads}
+        members={members}
+        workspaceId={workspaceId}
+        onSuccess={handleSheetSuccess}
       />
     </>
   )

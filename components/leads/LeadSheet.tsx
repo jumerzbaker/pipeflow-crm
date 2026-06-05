@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -19,61 +19,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
 import { StatusBadge } from '@/components/leads/StatusBadge'
-import { MOCK_OWNERS } from '@/lib/mock/leads'
+import { createLead, updateLead } from '@/app/actions/leads'
 import type { Lead, LeadStatus } from '@/types/lead'
 
 const STATUSES: LeadStatus[] = [
-  'novo',
-  'contatado',
-  'proposta',
-  'negociacao',
-  'ganho',
-  'perdido',
+  'novo', 'contatado', 'proposta', 'negociacao', 'ganho', 'perdido',
 ]
 
-const EMPTY_FORM: Omit<Lead, 'id' | 'createdAt'> = {
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  role: '',
-  status: 'novo',
-  owner: MOCK_OWNERS[0],
-  notes: '',
+interface FormState {
+  name: string
+  email: string
+  phone: string
+  company: string
+  role: string
+  status: LeadStatus
+  ownerId: string
+  notes: string
 }
 
 interface LeadSheetProps {
   open: boolean
   onClose: () => void
   lead?: Lead | null
-  onSave: (data: Omit<Lead, 'id' | 'createdAt'>) => void
+  members: { id: string; name: string }[]
+  workspaceId: string
+  onSuccess: () => void
 }
 
-export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [errors, setErrors] = useState<Partial<Record<keyof typeof EMPTY_FORM, string>>>({})
+export function LeadSheet({ open, onClose, lead, members, workspaceId, onSuccess }: LeadSheetProps) {
+  const [isPending, startTransition] = useTransition()
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const [serverError, setServerError] = useState<string>('')
+
+  const defaultOwnerId = members[0]?.id ?? ''
+
+  const emptyForm = (): FormState => ({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    role: '',
+    status: 'novo',
+    ownerId: defaultOwnerId,
+    notes: '',
+  })
+
+  const [form, setForm] = useState<FormState>(emptyForm())
 
   useEffect(() => {
-    if (lead) {
-      setForm({
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        company: lead.company,
-        role: lead.role,
-        status: lead.status,
-        owner: lead.owner,
-        notes: lead.notes ?? '',
-      })
-    } else {
-      setForm(EMPTY_FORM)
+    if (open) {
+      setErrors({})
+      setServerError('')
+      setForm(
+        lead
+          ? {
+              name: lead.name,
+              email: lead.email,
+              phone: lead.phone,
+              company: lead.company,
+              role: lead.role,
+              status: lead.status,
+              ownerId: lead.ownerId || defaultOwnerId,
+              notes: lead.notes ?? '',
+            }
+          : emptyForm(),
+      )
     }
-    setErrors({})
-  }, [lead, open])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, lead])
 
-  function validate() {
-    const e: typeof errors = {}
+  function validate(): Partial<Record<keyof FormState, string>> {
+    const e: Partial<Record<keyof FormState, string>> = {}
     if (!form.name.trim()) e.name = 'Nome é obrigatório'
     if (!form.email.trim()) {
       e.email = 'E-mail é obrigatório'
@@ -84,6 +102,11 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
     return e
   }
 
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }))
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
@@ -91,13 +114,29 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
       setErrors(errs)
       return
     }
-    onSave(form)
-    onClose()
-  }
 
-  function set<K extends keyof typeof EMPTY_FORM>(key: K, value: (typeof EMPTY_FORM)[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }))
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim() || undefined,
+      company: form.company.trim(),
+      role: form.role.trim() || undefined,
+      status: form.status,
+      owner_id: form.ownerId || null,
+      notes: form.notes.trim() || undefined,
+    }
+
+    startTransition(async () => {
+      const result = lead
+        ? await updateLead(workspaceId, lead.id, payload)
+        : await createLead(workspaceId, payload)
+
+      if (result.error) {
+        setServerError(result.error)
+      } else {
+        onSuccess()
+      }
+    })
   }
 
   return (
@@ -114,7 +153,12 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
 
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
-            {/* Name */}
+            {serverError && (
+              <p className="rounded-md bg-rose-500/10 px-3 py-2 text-xs text-rose-400">
+                {serverError}
+              </p>
+            )}
+
             <div className="space-y-1.5">
               <Label htmlFor="lead-name" className="text-sm text-gray-300">
                 Nome <span className="text-rose-400">*</span>
@@ -129,7 +173,6 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               {errors.name && <p className="text-xs text-rose-400">{errors.name}</p>}
             </div>
 
-            {/* Email */}
             <div className="space-y-1.5">
               <Label htmlFor="lead-email" className="text-sm text-gray-300">
                 E-mail <span className="text-rose-400">*</span>
@@ -146,11 +189,8 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               {errors.email && <p className="text-xs text-rose-400">{errors.email}</p>}
             </div>
 
-            {/* Phone */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-phone" className="text-sm text-gray-300">
-                Telefone
-              </Label>
+              <Label htmlFor="lead-phone" className="text-sm text-gray-300">Telefone</Label>
               <Input
                 id="lead-phone"
                 value={form.phone}
@@ -160,7 +200,6 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               />
             </div>
 
-            {/* Company */}
             <div className="space-y-1.5">
               <Label htmlFor="lead-company" className="text-sm text-gray-300">
                 Empresa <span className="text-rose-400">*</span>
@@ -175,11 +214,8 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               {errors.company && <p className="text-xs text-rose-400">{errors.company}</p>}
             </div>
 
-            {/* Role */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-role" className="text-sm text-gray-300">
-                Cargo
-              </Label>
+              <Label htmlFor="lead-role" className="text-sm text-gray-300">Cargo</Label>
               <Input
                 id="lead-role"
                 value={form.role}
@@ -189,14 +225,10 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               />
             </div>
 
-            {/* Status + Owner row */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-sm text-gray-300">Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => set('status', v as LeadStatus)}
-                >
+                <Select value={form.status} onValueChange={(v) => set('status', v as LeadStatus)}>
                   <SelectTrigger className="border-white/10 bg-gray-800 text-white focus:ring-violet-500/50">
                     <SelectValue />
                   </SelectTrigger>
@@ -213,16 +245,16 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               <div className="space-y-1.5">
                 <Label className="text-sm text-gray-300">Responsável</Label>
                 <Select
-                  value={form.owner}
-                  onValueChange={(v) => { if (v) set('owner', v) }}
+                  value={form.ownerId}
+                  onValueChange={(v) => { if (v) set('ownerId', v) }}
                 >
                   <SelectTrigger className="border-white/10 bg-gray-800 text-white focus:ring-violet-500/50">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="border-gray-700 bg-gray-800">
-                    {MOCK_OWNERS.map((o) => (
-                      <SelectItem key={o} value={o} className="text-white focus:bg-gray-700">
-                        {o}
+                    {members.map((m) => (
+                      <SelectItem key={m.id} value={m.id} className="text-white focus:bg-gray-700">
+                        {m.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -230,11 +262,8 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               </div>
             </div>
 
-            {/* Notes */}
             <div className="space-y-1.5">
-              <Label htmlFor="lead-notes" className="text-sm text-gray-300">
-                Observações
-              </Label>
+              <Label htmlFor="lead-notes" className="text-sm text-gray-300">Observações</Label>
               <Textarea
                 id="lead-notes"
                 value={form.notes}
@@ -251,15 +280,26 @@ export function LeadSheet({ open, onClose, lead, onSave }: LeadSheetProps) {
               type="button"
               variant="ghost"
               onClick={onClose}
+              disabled={isPending}
               className="text-gray-400 hover:bg-gray-800 hover:text-white"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
+              disabled={isPending}
               className="bg-violet-600 text-white hover:bg-violet-500"
             >
-              {lead ? 'Salvar alterações' : 'Criar lead'}
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                  Salvando…
+                </>
+              ) : lead ? (
+                'Salvar alterações'
+              ) : (
+                'Criar lead'
+              )}
             </Button>
           </SheetFooter>
         </form>
