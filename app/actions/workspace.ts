@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import * as z from 'zod'
-import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Tables } from '@/types/database'
 
 export type WorkspaceFormState =
@@ -38,6 +38,7 @@ export async function createWorkspace(
     return { errors: result.error.flatten().fieldErrors }
   }
 
+  // Verify identity via Auth API (anon client + cookie session)
   const supabase = await getSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -48,7 +49,12 @@ export async function createWorkspace(
   const baseSlug = toSlug(result.data.workspaceName)
   const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`
 
-  const { data: workspace, error: wsError } = await supabase
+  // Use admin client for INSERTs: the anon+SSR client doesn't forward the JWT
+  // to PostgREST correctly in Next.js server actions (known @supabase/ssr limitation).
+  // Identity was already verified above via getUser().
+  const admin = getSupabaseAdminClient()
+
+  const { data: workspace, error: wsError } = await admin
     .from('workspaces')
     .insert({ name: result.data.workspaceName, slug })
     .select('id')
@@ -58,7 +64,7 @@ export async function createWorkspace(
     return { errors: { workspaceName: ['Erro ao criar workspace. Tente novamente.'] } }
   }
 
-  const { error: memberError } = await supabase
+  const { error: memberError } = await admin
     .from('workspace_members')
     .insert({ workspace_id: workspace.id, user_id: user.id, role: 'admin' })
 

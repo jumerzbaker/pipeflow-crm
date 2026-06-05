@@ -48,6 +48,9 @@ export async function login(state: AuthFormState, formData: FormData): Promise<A
   })
 
   if (error) {
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      return { errors: { email: ['Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.'] } }
+    }
     return { errors: { email: ['E-mail ou senha incorretos.'] } }
   }
 
@@ -66,16 +69,22 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
   }
 
   const supabase = await getSupabaseServerClient()
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.password,
     options: {
       data: { name: result.data.name },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/onboarding`,
     },
   })
 
   if (error) {
     return { errors: { email: [error.message] } }
+  }
+
+  // Session is null when email confirmation is required
+  if (!data.session) {
+    redirect('/verify-email')
   }
 
   redirect('/onboarding')
