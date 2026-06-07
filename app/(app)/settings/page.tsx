@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useTransition, useOptimistic } from 'react'
+import { useState, useTransition, useOptimistic, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   Building2, Users, CreditCard, Upload, UserPlus, Crown,
-  Check, Clock, X, ShieldCheck, UserCheck, Loader2,
+  Check, Clock, X, ShieldCheck, UserCheck, Loader2, UserCircle,
+  Mail, KeyRound, AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
@@ -27,6 +29,13 @@ import {
   type WorkspaceMember,
   type PendingInvite,
 } from '@/app/actions/invites'
+import {
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  type ProfileActionResult,
+} from '@/app/actions/auth'
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -53,12 +62,13 @@ const PRO_FEATURES = [
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
-type Tab = 'workspace' | 'membros' | 'billing'
+type Tab = 'workspace' | 'membros' | 'billing' | 'conta'
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'workspace', label: 'Workspace', icon: Building2 },
-  { id: 'membros',   label: 'Membros',   icon: Users     },
-  { id: 'billing',   label: 'Billing',   icon: CreditCard },
+  { id: 'workspace', label: 'Workspace', icon: Building2   },
+  { id: 'membros',   label: 'Membros',   icon: Users       },
+  { id: 'billing',   label: 'Billing',   icon: CreditCard  },
+  { id: 'conta',     label: 'Conta',     icon: UserCircle  },
 ]
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
@@ -554,10 +564,184 @@ function BillingTab({ plan, memberCount }: { plan: string; memberCount: number }
   )
 }
 
+// ─── Conta tab ────────────────────────────────────────────────────────────────
+
+function ContaTab() {
+  const supabase = getSupabaseBrowserClient()
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loadedUser, setLoadedUser] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  // Load user data from Supabase on first render
+  if (!loadedUser) {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setName((user.user_metadata?.full_name as string | undefined) ?? '')
+        setEmail(user.email ?? '')
+        setLoadedUser(true)
+      }
+    })
+  }
+
+  function showToast(message: string, type: 'error' | 'success') {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 5000)
+  }
+
+  function handleUpdateName() {
+    startTransition(async () => {
+      const result = await updateProfile({ name })
+      if (result.error) showToast(result.error, 'error')
+      else showToast('Nome atualizado com sucesso.', 'success')
+    })
+  }
+
+  function handleUpdateEmail() {
+    startTransition(async () => {
+      const result = await updateEmail({ email })
+      if (result.error) showToast(result.error, 'error')
+      else showToast(result.message ?? 'Confirmação enviada.', 'success')
+    })
+  }
+
+  function handleUpdatePassword() {
+    if (newPassword !== confirmPassword) {
+      showToast('As senhas não coincidem.', 'error')
+      return
+    }
+    startTransition(async () => {
+      const result = await updatePassword({ password: newPassword })
+      if (result.error) showToast(result.error, 'error')
+      else {
+        showToast(result.message ?? 'Senha alterada com sucesso.', 'success')
+        setNewPassword('')
+        setConfirmPassword('')
+      }
+    })
+  }
+
+  return (
+    <div className="space-y-5">
+      {toast && <Toast message={toast.message} type={toast.type} />}
+
+      {/* Nome */}
+      <Card>
+        <SectionTitle>Nome</SectionTitle>
+        <SectionDescription>Como você aparece para outros membros do workspace.</SectionDescription>
+        <div className="mt-5 flex items-end gap-3">
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor="conta-name" className="text-sm text-pf-text-sec">
+              Nome completo
+            </Label>
+            <Input
+              id="conta-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Seu nome"
+              className="h-9 max-w-sm"
+            />
+          </div>
+          <Button
+            onClick={handleUpdateName}
+            disabled={isPending || name.length < 2}
+            className="bg-pf-accent text-pf-bg hover:bg-pf-accent/90 disabled:opacity-40"
+          >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar'}
+          </Button>
+        </div>
+      </Card>
+
+      {/* E-mail */}
+      <Card>
+        <SectionTitle>E-mail</SectionTitle>
+        <SectionDescription>
+          Usado para login e notificações. Uma confirmação será enviada para o novo endereço.
+        </SectionDescription>
+        <div className="mt-5 space-y-3">
+          <div className="flex items-end gap-3">
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="conta-email" className="text-sm text-pf-text-sec">
+                Novo e-mail
+              </Label>
+              <Input
+                id="conta-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-9 max-w-sm"
+              />
+            </div>
+            <Button
+              onClick={handleUpdateEmail}
+              disabled={isPending || !email}
+              className="bg-pf-accent text-pf-bg hover:bg-pf-accent/90 disabled:opacity-40"
+            >
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Atualizar'}
+            </Button>
+          </div>
+          <div className="flex items-start gap-2 text-xs text-pf-text-muted">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>O e-mail atual permanece ativo até você confirmar o novo pelo link enviado.</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Senha */}
+      <Card>
+        <SectionTitle>Senha</SectionTitle>
+        <SectionDescription>Mínimo de 8 caracteres com pelo menos uma letra e um número.</SectionDescription>
+        <div className="mt-5 space-y-3">
+          <div className="grid max-w-sm gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="new-password" className="text-sm text-pf-text-sec">
+                Nova senha
+              </Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="confirm-password" className="text-sm text-pf-text-sec">
+                Confirmar senha
+              </Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-9"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleUpdatePassword}
+            disabled={isPending || !newPassword || !confirmPassword}
+            className="bg-pf-accent text-pf-bg hover:bg-pf-accent/90 disabled:opacity-40"
+          >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Alterar senha'}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  )
+}
+
 // ─── Page (client shell with async data loading) ──────────────────────────────
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { activeWorkspace } = useWorkspace()
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<Tab>('workspace')
   const [members, setMembers] = useState<WorkspaceMember[]>([])
   const [invites, setInvites] = useState<PendingInvite[]>([])
@@ -566,6 +750,14 @@ export default function SettingsPage() {
 
   const workspaceId = activeWorkspace?.id ?? ''
   const plan = activeWorkspace?.plan ?? 'free'
+
+  // Honour ?tab=conta (or any valid tab) from URL
+  useEffect(() => {
+    const tab = searchParams.get('tab') as Tab | null
+    if (tab && TABS.some((t) => t.id === tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   // Load members data when switching to Membros tab
   function handleTabChange(tab: Tab) {
@@ -621,6 +813,15 @@ export default function SettingsPage() {
       {activeTab === 'billing' && (
         <BillingTab plan={plan} memberCount={members.length} />
       )}
+      {activeTab === 'conta' && <ContaTab />}
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense>
+      <SettingsContent />
+    </Suspense>
   )
 }

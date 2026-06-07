@@ -115,3 +115,59 @@ export async function logout(): Promise<void> {
   await supabase.auth.signOut()
   redirect('/login')
 }
+
+// ── Profile update actions ────────────────────────────────────────────────────
+
+const UpdateNameSchema = z.object({
+  name: z.string().min(2, { message: 'Nome deve ter pelo menos 2 caracteres.' }).trim(),
+})
+
+const UpdateEmailSchema = z.object({
+  email: z.string().email({ message: 'E-mail inválido.' }).trim(),
+})
+
+const UpdatePasswordSchema = z.object({
+  password: z
+    .string()
+    .min(8, { message: 'Senha deve ter pelo menos 8 caracteres.' })
+    .regex(/[a-zA-Z]/, { message: 'Senha deve conter pelo menos uma letra.' })
+    .regex(/[0-9]/, { message: 'Senha deve conter pelo menos um número.' })
+    .trim(),
+})
+
+export type ProfileActionResult = { error?: string; message?: string }
+
+export async function updateProfile(data: { name: string }): Promise<ProfileActionResult> {
+  const parsed = UpdateNameSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0].message }
+
+  const supabase = await getSupabaseServerClient()
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name: parsed.data.name },
+  })
+
+  if (error) return { error: 'Erro ao atualizar nome. Tente novamente.' }
+  return {}
+}
+
+export async function updateEmail(data: { email: string }): Promise<ProfileActionResult> {
+  const parsed = UpdateEmailSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0].message }
+
+  const supabase = await getSupabaseServerClient()
+  const { error } = await supabase.auth.updateUser({ email: parsed.data.email })
+
+  if (error) return { error: 'Erro ao solicitar troca de e-mail. Tente novamente.' }
+  return { message: `E-mail de confirmação enviado para ${parsed.data.email}. Confirme para efetivar a troca.` }
+}
+
+export async function updatePassword(data: { password: string }): Promise<ProfileActionResult> {
+  const parsed = UpdatePasswordSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0].message }
+
+  const supabase = await getSupabaseServerClient()
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
+
+  if (error) return { error: 'Erro ao alterar senha. Tente novamente.' }
+  return { message: 'Senha alterada com sucesso.' }
+}
