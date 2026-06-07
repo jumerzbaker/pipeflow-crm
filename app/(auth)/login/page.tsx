@@ -1,13 +1,17 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { login } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/auth/FieldError'
 
-export default function LoginPage() {
+function LoginForm() {
   const [state, action, pending] = useActionState(login, undefined)
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') ?? ''
 
   return (
     <div className="w-full max-w-sm">
@@ -26,6 +30,8 @@ export default function LoginPage() {
         </div>
 
         <form action={action} className="space-y-4">
+          {next && <input type="hidden" name="next" value={next} />}
+
           <div className="space-y-1.5">
             <label htmlFor="email" className="block text-sm font-medium text-gray-300">
               E-mail
@@ -85,5 +91,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

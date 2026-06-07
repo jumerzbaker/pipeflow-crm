@@ -330,6 +330,6 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M10 | Multi-tenant + RLS | `feat/multi-tenant` | ✅ Concluído |
 | M11 | Leads + Pipeline Backend | `feat/leads-data` | ✅ Concluído |
 | M12 | Atividades + Dashboard Backend | `feat/leads-data` | ✅ Concluído |
-| M13 | Convites | `feat/invites` | ⬜ Pendente |
+| M13 | Convites | `feat/collaboration` | ✅ Concluído |
 | M14 | Stripe Billing | `feat/billing` | ⬜ Pendente |
 | M15 | Deploy Produção | `feat/deploy` | ⬜ Pendente |

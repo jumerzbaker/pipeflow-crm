@@ -54,7 +54,10 @@ export async function login(state: AuthFormState, formData: FormData): Promise<A
     return { errors: { email: ['E-mail ou senha incorretos.'] } }
   }
 
-  redirect('/dashboard')
+  // Allow redirect to invite pages or other safe internal paths
+  const next = formData.get('next')?.toString() ?? ''
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
+  redirect(safeNext)
 }
 
 export async function signup(state: AuthFormState, formData: FormData): Promise<AuthFormState> {
