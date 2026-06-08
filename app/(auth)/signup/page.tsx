@@ -1,13 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { signup } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/auth/FieldError'
 
-export default function SignupPage() {
+function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined)
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') ?? ''
 
   return (
     <div className="w-full max-w-sm">
@@ -17,7 +21,7 @@ export default function SignupPage() {
           <p className="mt-1 text-sm text-gray-500">
             Já tem uma conta?{' '}
             <Link
-              href="/login"
+              href={next ? `/login?next=${encodeURIComponent(next)}` : '/login'}
               className="text-violet-400 transition-colors hover:text-violet-300"
             >
               Entrar
@@ -26,6 +30,8 @@ export default function SignupPage() {
         </div>
 
         <form action={action} className="space-y-4">
+          {next && <input type="hidden" name="next" value={next} />}
+
           <div className="space-y-1.5">
             <label htmlFor="name" className="block text-sm font-medium text-gray-300">
               Nome completo
@@ -99,5 +105,13 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   )
 }

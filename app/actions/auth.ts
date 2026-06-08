@@ -71,13 +71,18 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
     return { errors: result.error.flatten().fieldErrors }
   }
 
+  const next = formData.get('next')?.toString() ?? ''
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/onboarding'
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
   const supabase = await getSupabaseServerClient()
   const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.password,
     options: {
-      data: { name: result.data.name },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/onboarding`,
+      data: { name: result.data.name, full_name: result.data.name },
+      emailRedirectTo: `${appUrl}/api/auth/callback?next=${encodeURIComponent(safeNext)}`,
     },
   })
 
@@ -90,7 +95,7 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
     redirect('/verify-email')
   }
 
-  redirect('/onboarding')
+  redirect(safeNext)
 }
 
 export async function forgotPassword(state: AuthFormState, formData: FormData): Promise<AuthFormState> {

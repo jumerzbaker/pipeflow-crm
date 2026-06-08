@@ -110,6 +110,16 @@ export async function sendInvite(
 
   const admin = getSupabaseAdminClient()
 
+  // Verify caller is admin of this workspace
+  const { data: callerMember } = await admin
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (callerMember?.role !== 'admin')
+    return { error: 'Apenas administradores podem convidar membros.' }
+
   // Fetch workspace to check plan
   const { data: workspace } = await admin
     .from('workspaces')
@@ -190,9 +200,20 @@ export async function revokeInvite(
   workspaceId: string,
   inviteId: string,
 ): Promise<InviteActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
 
   const admin = getSupabaseAdminClient()
+
+  // Verify caller is admin of this workspace
+  const { data: callerMember } = await admin
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (callerMember?.role !== 'admin')
+    return { error: 'Apenas administradores podem revogar convites.' }
+
   const { error } = await admin
     .from('workspace_invites')
     .delete()

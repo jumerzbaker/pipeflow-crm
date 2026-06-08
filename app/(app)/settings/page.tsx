@@ -176,10 +176,12 @@ function MembrosTab({
   initialMembers,
   initialInvites,
   plan,
+  isAdmin,
 }: {
   initialMembers: WorkspaceMember[]
   initialInvites: PendingInvite[]
   plan: string
+  isAdmin: boolean
 }) {
   const { activeWorkspace } = useWorkspace()
   const [members, setMembers] = useState<WorkspaceMember[]>(initialMembers)
@@ -259,30 +261,32 @@ function MembrosTab({
               {isFree ? ' no plano Free' : ' no plano Pro'}.
             </SectionDescription>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <Button
-              size="sm"
-              onClick={() => setInviteOpen(true)}
-              disabled={atLimit}
-              className={cn(
-                'gap-1.5',
-                atLimit
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'bg-pf-accent text-pf-bg hover:bg-pf-accent/90',
+          {isAdmin && (
+            <div className="flex flex-col items-end gap-1">
+              <Button
+                size="sm"
+                onClick={() => setInviteOpen(true)}
+                disabled={atLimit}
+                className={cn(
+                  'gap-1.5',
+                  atLimit
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'bg-pf-accent text-pf-bg hover:bg-pf-accent/90',
+                )}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Convidar membro
+              </Button>
+              {atLimit && (
+                <p className="text-[11px] text-pf-text-muted">
+                  Limite Free atingido.{' '}
+                  <a href="#billing" className="text-pf-accent underline underline-offset-2">
+                    Fazer upgrade
+                  </a>
+                </p>
               )}
-            >
-              <UserPlus className="h-3.5 w-3.5" />
-              Convidar membro
-            </Button>
-            {atLimit && (
-              <p className="text-[11px] text-pf-text-muted">
-                Limite Free atingido.{' '}
-                <a href="#billing" className="text-pf-accent underline underline-offset-2">
-                  Fazer upgrade
-                </a>
-              </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Members table */}
@@ -319,7 +323,7 @@ function MembrosTab({
                     {m.joinedAt}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {m.role !== 'admin' && (
+                    {isAdmin && m.role !== 'admin' && (
                       <button
                         onClick={() => handleRemove(m.userId, m.name)}
                         disabled={isPending}
@@ -343,8 +347,8 @@ function MembrosTab({
           </table>
         </div>
 
-        {/* Pending invites */}
-        {invites.length > 0 && (
+        {/* Pending invites — admin only */}
+        {isAdmin && invites.length > 0 && (
           <div className="mt-5">
             <p className="mb-2.5 text-xs font-medium uppercase tracking-wider text-pf-text-muted">
               Convites pendentes
@@ -750,6 +754,7 @@ function SettingsContent() {
 
   const workspaceId = activeWorkspace?.id ?? ''
   const plan = activeWorkspace?.plan ?? 'free'
+  const isAdmin = activeWorkspace?.role === 'admin'
 
   // Honour ?tab=conta (or any valid tab) from URL
   useEffect(() => {
@@ -808,6 +813,7 @@ function SettingsContent() {
           initialMembers={members}
           initialInvites={invites}
           plan={plan}
+          isAdmin={isAdmin}
         />
       )}
       {activeTab === 'billing' && (
