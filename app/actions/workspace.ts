@@ -79,9 +79,13 @@ export async function getUserWorkspaces(): Promise<
   (Tables<'workspaces'> & { role: string })[]
 > {
   const supabase = await getSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data } = await supabase
     .from('workspace_members')
     .select('role, workspaces(*)')
+    .eq('user_id', user.id)
     .order('joined_at', { ascending: true })
 
   if (!data) return []
