@@ -42,13 +42,13 @@ export async function login(state: AuthFormState, formData: FormData): Promise<A
   }
 
   const supabase = await getSupabaseServerClient()
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: result.data.email,
     password: result.data.password,
   })
 
-  if (error) {
-    if (error.message.toLowerCase().includes('email not confirmed')) {
+  if (error || !data.session) {
+    if (error?.message.toLowerCase().includes('email not confirmed')) {
       return { errors: { email: ['Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.'] } }
     }
     return { errors: { email: ['E-mail ou senha incorretos.'] } }
