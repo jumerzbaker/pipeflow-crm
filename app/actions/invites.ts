@@ -335,6 +335,7 @@ export async function acceptInvite(token: string): Promise<InviteActionResult> {
 export type InviteDetails = {
   workspaceName: string
   role: string
+  email: string
   inviterEmail: string | null
   expired: boolean
   accepted: boolean
@@ -345,7 +346,7 @@ export async function getInviteDetails(token: string): Promise<InviteDetails | n
 
   const { data: invite } = await admin
     .from('workspace_invites')
-    .select('workspace_id, role, expires_at, accepted_at')
+    .select('workspace_id, role, expires_at, accepted_at, email')
     .eq('token', token)
     .maybeSingle()
 
@@ -360,6 +361,7 @@ export async function getInviteDetails(token: string): Promise<InviteDetails | n
   return {
     workspaceName: workspace?.name ?? 'Workspace',
     role: invite.role,
+    email: invite.email,
     inviterEmail: null,
     expired: new Date(invite.expires_at) < new Date(),
     accepted: invite.accepted_at !== null,

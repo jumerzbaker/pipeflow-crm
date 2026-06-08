@@ -129,20 +129,12 @@ export default async function InvitePage({
             {user ? (
               <AcceptForm token={token} />
             ) : (
-              <div className="flex flex-col gap-2">
-                <a
-                  href={`/login?next=/invite/${token}`}
-                  className="w-full rounded-xl bg-violet-600 py-3 text-center text-sm font-semibold text-white transition hover:bg-violet-500"
-                >
-                  Fazer login para aceitar
-                </a>
-                <a
-                  href={`/signup?next=/invite/${token}`}
-                  className="w-full rounded-xl border border-white/10 py-3 text-center text-sm font-medium text-zinc-300 transition hover:bg-white/5"
-                >
-                  Criar conta
-                </a>
-              </div>
+              <a
+                href={`/signup?next=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(details.email)}`}
+                className="w-full rounded-xl bg-violet-600 py-3 text-center text-sm font-semibold text-white transition hover:bg-violet-500"
+              >
+                Aceitar convite
+              </a>
             )}
 
             <p className="text-center text-xs text-zinc-600">
