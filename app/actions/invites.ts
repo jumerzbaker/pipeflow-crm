@@ -170,8 +170,7 @@ export async function sendInvite(
   if (insertError || !invite) return { error: 'Erro ao criar convite.' }
 
   // Resolve inviter name
-  const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 })
-  const inviter = users.find((u) => u.id === user.id)
+  const { data: { user: inviter } } = await admin.auth.admin.getUserById(user.id)
   const inviterName =
     (inviter?.user_metadata?.full_name as string) || inviter?.email || 'Alguém'
 
@@ -290,6 +289,11 @@ export async function acceptInvite(token: string): Promise<InviteActionResult> {
     .maybeSingle()
 
   if (!invite) return { error: 'Convite inválido ou expirado.' }
+
+  // Validate that the logged-in user's email matches the invite
+  if (user.email?.toLowerCase() !== invite.email.toLowerCase()) {
+    return { error: 'Este convite foi enviado para outro e-mail.' }
+  }
 
   // Check if already a member
   const { data: existing } = await admin

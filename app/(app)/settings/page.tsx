@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useOptimistic, useEffect, Suspense } from 'react'
+import { useState, useTransition, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Building2, Users, CreditCard, Upload, UserPlus, Crown,
@@ -577,20 +577,18 @@ function ContaTab() {
   const [email, setEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loadedUser, setLoadedUser] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  // Load user data from Supabase on first render
-  if (!loadedUser) {
+  // Load current user data once on mount
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setName((user.user_metadata?.full_name as string | undefined) ?? '')
         setEmail(user.email ?? '')
-        setLoadedUser(true)
       }
     })
-  }
+  }, [])
 
   function showToast(message: string, type: 'error' | 'success') {
     setToast({ message, type })
@@ -764,10 +762,10 @@ function SettingsContent() {
     }
   }, [searchParams])
 
-  // Load members data when switching to Membros tab
+  // Load members data when switching to Membros or Billing tab
   function handleTabChange(tab: Tab) {
     setActiveTab(tab)
-    if (tab === 'membros' && !loaded && workspaceId) {
+    if ((tab === 'membros' || tab === 'billing') && !loaded && workspaceId) {
       startTransition(async () => {
         const [m, i] = await Promise.all([
           getWorkspaceMembersWithDetails(workspaceId),

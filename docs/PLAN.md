@@ -262,15 +262,17 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Fluxo completo de convite por e-mail com controle de limite do plano Free.
 
 #### Entregas
-- [ ] Migration `006_invites.sql`: tabela `workspace_invites` (id, workspace_id, email, token, role, expires_at, accepted_at)
-- [ ] Instalar e configurar Resend (`RESEND_API_KEY`)
-- [ ] `lib/resend/index.ts` — helper para envio de e-mails
-- [ ] Supabase Edge Function `invite-member`: valida limite Free (max 2 membros), cria invite, envia e-mail via Resend com link `/invite/[token]`
-- [ ] Página de aceite `app/invite/[token]/page.tsx` — exibe info do workspace, botão "Aceitar convite"
-- [ ] Ao aceitar: cria registro em `workspace_members`, marca `accepted_at` no invite
-- [ ] Enforcement no modal de convite: desabilitar botão + tooltip explicativo se plano Free com 2 membros
+- [x] Migration `006_invites.sql`: tabela `workspace_invites` (id, workspace_id, email, token, role, expires_at, accepted_at)
+- [x] Instalar e configurar Resend (`RESEND_API_KEY`)
+- [x] `lib/resend/index.ts` — helper para envio de e-mails
+- [x] Server Action `sendInvite`: valida limite Free (max 2 membros), cria invite, envia e-mail via Resend com link `/invite/[token]` (substituiu Edge Function — mais simples e igualmente seguro)
+- [x] Página de aceite `app/invite/[token]/page.tsx` — exibe info do workspace, botão "Aceitar convite"
+- [x] Ao aceitar: cria registro em `workspace_members`, marca `accepted_at` no invite
+- [x] Enforcement no modal de convite: desabilitar botão + tooltip explicativo se plano Free com 2 membros
+- [x] Role check em `sendInvite` e `revokeInvite`: apenas admins podem convidar/revogar
+- [x] Signup propaga `?next=/invite/[token]` para que novos usuários sejam redirecionados corretamente após cadastro
 
-**Commit final:** `feat: convite de colaboradores por e-mail com Resend e Edge Function`
+**Commit final:** `feat: convite de colaboradores por e-mail com Resend`
 
 ---
 
