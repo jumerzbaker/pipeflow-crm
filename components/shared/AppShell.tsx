@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { WorkspaceProvider, type WorkspaceWithRole } from '@/contexts/WorkspaceContext'
+import { setActiveWorkspaceCookie } from '@/app/actions/workspace'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -15,6 +16,12 @@ interface AppShellProps {
 
 export function AppShell({ children, workspaces, initialWorkspace, userName, userEmail }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    if (initialWorkspace) {
+      setActiveWorkspaceCookie(initialWorkspace.id)
+    }
+  }, [initialWorkspace?.id])
 
   return (
     <WorkspaceProvider workspaces={workspaces} initialWorkspace={initialWorkspace}>

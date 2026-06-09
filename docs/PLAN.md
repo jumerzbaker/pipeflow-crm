@@ -274,6 +274,12 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 
 **Commit final:** `feat: convite de colaboradores por e-mail com Resend`
 
+**Fixes (revisão pós-entrega):**
+- Redirecionamento pós-remoção de membro apontava para `/onboarding` (errado) → corrigido para `/no-workspace` quando sem workspaces, ou `/dashboard` quando há outros workspaces disponíveis
+- `proxy.ts` agora verifica membership do workspace ativo a cada request via cookie `pf_active_ws`
+- `setActiveWorkspaceCookie` criada como Server Action (Next.js 16 proíbe `cookies().set()` em Server Components) e chamada pelo `AppShell` via `useEffect`
+- Página `/no-workspace` criada dentro do grupo `(auth)` com mensagem clara e CTA para criar novo workspace
+
 ---
 
 ### M14 — Stripe Billing

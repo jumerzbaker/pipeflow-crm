@@ -11,7 +11,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const workspaces = await getUserWorkspaces()
 
-  if (workspaces.length === 0) redirect('/onboarding')
+  if (workspaces.length === 0) redirect('/no-workspace')
 
   const userName = (user.user_metadata?.full_name as string | undefined) || user.email || 'Usuário'
   const userEmail = user.email ?? ''
