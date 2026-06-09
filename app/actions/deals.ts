@@ -36,6 +36,16 @@ async function getAuthedUser() {
   return user
 }
 
+async function assertMembership(admin: ReturnType<typeof getSupabaseAdminClient>, workspaceId: string, userId: string) {
+  const { data } = await admin
+    .from('workspace_members')
+    .select('user_id')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!data) throw new Error('Forbidden')
+}
+
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -111,6 +121,7 @@ export async function createDeal(
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
 
   // position = max in that stage + 1
   const { data: existing } = await admin
@@ -149,11 +160,12 @@ export async function updateDeal(
   dealId: string,
   formData: DealFormData,
 ): Promise<DealActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
   const parsed = DealSchema.safeParse(formData)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
   const { error } = await admin
     .from('deals')
     .update({
@@ -179,9 +191,10 @@ export async function updateDealStage(
   stage: DealStage,
   position: number,
 ): Promise<DealActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
   const { error } = await admin
     .from('deals')
     .update({ stage, position })
@@ -198,9 +211,10 @@ export async function deleteDeal(
   workspaceId: string,
   dealId: string,
 ): Promise<DealActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
   const { error } = await admin
     .from('deals')
     .delete()

@@ -1,13 +1,19 @@
 'use client'
 
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { signup } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/auth/FieldError'
 
-export default function SignupPage() {
+function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined)
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') ?? ''
+  const inviteEmail = searchParams.get('email') ?? ''
+  const fromInvite = !!inviteEmail
 
   return (
     <div className="w-full max-w-sm">
@@ -17,7 +23,7 @@ export default function SignupPage() {
           <p className="mt-1 text-sm text-gray-500">
             Já tem uma conta?{' '}
             <Link
-              href="/login"
+              href={next ? `/login?next=${encodeURIComponent(next)}` : '/login'}
               className="text-violet-400 transition-colors hover:text-violet-300"
             >
               Entrar
@@ -26,6 +32,8 @@ export default function SignupPage() {
         </div>
 
         <form action={action} className="space-y-4">
+          {next && <input type="hidden" name="next" value={next} />}
+
           <div className="space-y-1.5">
             <label htmlFor="name" className="block text-sm font-medium text-gray-300">
               Nome completo
@@ -52,11 +60,16 @@ export default function SignupPage() {
               name="email"
               type="email"
               autoComplete="email"
+              defaultValue={inviteEmail}
+              readOnly={fromInvite}
               placeholder="voce@empresa.com"
-              className="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-600 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30"
+              className={`w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-600 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30${fromInvite ? ' cursor-not-allowed opacity-70' : ''}`}
               aria-invalid={!!state?.errors?.email}
               aria-describedby={state?.errors?.email ? 'email-error' : undefined}
             />
+            {fromInvite && (
+              <p className="text-xs text-zinc-500">E-mail definido pelo convite — não pode ser alterado.</p>
+            )}
             <FieldError id="email-error" errors={state?.errors?.email} />
           </div>
 
@@ -99,5 +112,13 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   )
 }

@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import * as z from 'zod'
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Tables } from '@/types/database'
@@ -79,9 +80,13 @@ export async function getUserWorkspaces(): Promise<
   (Tables<'workspaces'> & { role: string })[]
 > {
   const supabase = await getSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data } = await supabase
     .from('workspace_members')
     .select('role, workspaces(*)')
+    .eq('user_id', user.id)
     .order('joined_at', { ascending: true })
 
   if (!data) return []
@@ -116,4 +121,13 @@ export async function getWorkspaceMembers(
       id: u.id,
       name: (u.user_metadata?.full_name as string) || u.email || 'Usuário',
     }))
+}
+
+export async function setActiveWorkspaceCookie(workspaceId: string): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.set('pf_active_ws', workspaceId, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+  })
 }

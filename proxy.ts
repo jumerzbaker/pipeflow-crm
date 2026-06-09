@@ -2,6 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const ACTIVE_WS_COOKIE = 'pf_active_ws'
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
@@ -39,6 +41,38 @@ export async function proxy(request: NextRequest) {
 
   if (isAuthRoute && user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Verifica se o usuário ainda pertence ao workspace ativo a cada request
+  if (isAppRoute && user) {
+    const activeWsId = request.cookies.get(ACTIVE_WS_COOKIE)?.value
+
+    if (activeWsId) {
+      const { data: membership } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('workspace_id', activeWsId)
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!membership) {
+        // Usuário foi removido — verifica se ainda tem outros workspaces
+        const { data: otherWs } = await supabase
+          .from('workspace_members')
+          .select('workspace_id')
+          .eq('user_id', user.id)
+          .limit(1)
+          .maybeSingle()
+
+        const redirectUrl = otherWs
+          ? new URL('/dashboard', request.url)
+          : new URL('/no-workspace', request.url)
+
+        const redirectResponse = NextResponse.redirect(redirectUrl)
+        redirectResponse.cookies.delete(ACTIVE_WS_COOKIE)
+        return redirectResponse
+      }
+    }
   }
 
   return response

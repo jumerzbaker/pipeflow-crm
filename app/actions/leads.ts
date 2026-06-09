@@ -30,6 +30,16 @@ async function getAuthedUser() {
   return user
 }
 
+async function assertMembership(admin: ReturnType<typeof getSupabaseAdminClient>, workspaceId: string, userId: string) {
+  const { data } = await admin
+    .from('workspace_members')
+    .select('user_id')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!data) throw new Error('Forbidden')
+}
+
 async function batchResolveNames(
   userIds: (string | null)[],
 ): Promise<Map<string, string>> {
@@ -123,6 +133,8 @@ export async function createLead(
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
+
   const { error } = await admin.from('leads').insert({
     workspace_id: workspaceId,
     owner_id: parsed.data.owner_id ?? user.id,
@@ -146,11 +158,12 @@ export async function updateLead(
   leadId: string,
   formData: LeadFormData,
 ): Promise<LeadActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
   const parsed = LeadSchema.safeParse(formData)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
   const { error } = await admin
     .from('leads')
     .update({
@@ -177,9 +190,10 @@ export async function deleteLead(
   workspaceId: string,
   leadId: string,
 ): Promise<LeadActionResult> {
-  await getAuthedUser()
+  const user = await getAuthedUser()
 
   const admin = getSupabaseAdminClient()
+  await assertMembership(admin, workspaceId, user.id)
   const { error } = await admin
     .from('leads')
     .delete()
