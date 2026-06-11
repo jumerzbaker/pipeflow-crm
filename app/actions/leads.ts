@@ -124,6 +124,8 @@ export async function getLeadById(
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
+const FREE_LEAD_LIMIT = 50
+
 export async function createLead(
   workspaceId: string,
   formData: LeadFormData,
@@ -134,6 +136,27 @@ export async function createLead(
 
   const admin = getSupabaseAdminClient()
   await assertMembership(admin, workspaceId, user.id)
+
+  // Enforce Free plan lead limit
+  const { data: workspace } = await admin
+    .from('workspaces')
+    .select('plan')
+    .eq('id', workspaceId)
+    .single()
+
+  if (workspace?.plan === 'free') {
+    const { count } = await admin
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
+
+    if ((count ?? 0) >= FREE_LEAD_LIMIT) {
+      return {
+        error:
+          'Limite de 50 leads atingido no plano Free. Faça upgrade para o Pro em Configurações › Billing.',
+      }
+    }
+  }
 
   const { error } = await admin.from('leads').insert({
     workspace_id: workspaceId,
