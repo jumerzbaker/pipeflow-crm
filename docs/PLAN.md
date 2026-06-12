@@ -287,18 +287,24 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 **Objetivo:** Monetização completa com checkout, webhook e customer portal, aplicando limites do plano Free.
 
 #### Entregas
-- [ ] Instalar Stripe SDK, criar `lib/stripe/index.ts`
-- [ ] Route Handler `app/api/checkout/route.ts` — cria `checkout.session` com `price_id` do Pro, salva `stripe_customer_id` no workspace
-- [ ] Supabase Edge Function `stripe-webhook`:
+- [x] Instalar Stripe SDK, criar `lib/stripe/index.ts`
+- [x] Server Action `createCheckoutSession` em `app/actions/billing.ts` — cria `checkout.session` com `price_id` do Pro, salva `stripe_customer_id` no workspace
+- [x] Route Handler `app/api/webhooks/stripe/route.ts` (não Edge Function):
   - `checkout.session.completed` → atualiza `plan = 'pro'` e `stripe_subscription_id`
   - `customer.subscription.deleted` → atualiza `plan = 'free'`
-- [ ] Route Handler `app/api/billing/portal/route.ts` — cria sessão do Customer Portal
-- [ ] Botão "Fazer upgrade" na aba Billing conectado ao checkout real
-- [ ] Botão "Gerenciar assinatura" conectado ao Customer Portal
-- [ ] Middleware verifica limites Free: bloquear criação de lead (>50) ou convite (>2 membros) com toast de upgrade
-- [ ] Variáveis: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`
+  - `invoice.payment_failed` → seta `payment_failed = true` (Smart Retries)
+- [x] Server Action `createPortalSession` — cria sessão do Customer Portal
+- [x] Página `/settings/billing` com plano atual, barras de uso e comparativo Free vs Pro
+- [x] Botão "Assinar Pro" conectado ao checkout real
+- [x] Botão "Gerenciar assinatura" conectado ao Customer Portal
+- [x] `lib/limits.ts`: `canAddLead()` e `canAddMember()` — limites Free centralizados
+- [x] `createLead` bloqueia criação acima de 50 leads no plano Free
+- [x] `sendInvite` bloqueia convite acima de 2 membros no plano Free
+- [x] Banner de aviso na listagem de leads (âmbar ≥ 90%, bloqueio em 100%)
+- [x] Migration `008`: coluna `payment_failed boolean` na tabela `workspaces`
+- [x] Variáveis: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`
 
-**Commit final:** `feat: Stripe billing — checkout, webhook, customer portal e limites Free`
+**Commit final:** `feat: limites de plano, página /settings/billing e webhook invoice.payment_failed (M14)` (#13)
 
 ---
 
@@ -339,5 +345,5 @@ A abordagem é **UI-first**: construir todas as telas com mock data antes de con
 | M11 | Leads + Pipeline Backend | `feat/leads-data` | ✅ Concluído |
 | M12 | Atividades + Dashboard Backend | `feat/leads-data` | ✅ Concluído |
 | M13 | Convites | `feat/collaboration` | ✅ Concluído |
-| M14 | Stripe Billing | `feat/billing` | ⬜ Pendente |
+| M14 | Stripe Billing | `feat/billing-nextjs` | ✅ Concluído |
 | M15 | Deploy Produção | `feat/deploy` | ⬜ Pendente |
