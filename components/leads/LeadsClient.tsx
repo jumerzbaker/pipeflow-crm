@@ -25,7 +25,9 @@ import {
 import { StatusBadge, STATUS_CONFIG } from '@/components/leads/StatusBadge'
 import { LeadSheet } from '@/components/leads/LeadSheet'
 import { DeleteLeadDialog } from '@/components/leads/DeleteLeadDialog'
+import { AlertTriangle } from 'lucide-react'
 import type { Lead, LeadStatus } from '@/types/lead'
+import type { LimitCheck } from '@/lib/limits'
 
 const PAGE_SIZE = 8
 const STATUSES: LeadStatus[] = ['novo', 'contatado', 'proposta', 'negociacao', 'ganho', 'perdido']
@@ -39,9 +41,10 @@ interface LeadsClientProps {
   initialLeads: Lead[]
   members: { id: string; name: string }[]
   workspaceId: string
+  leadLimitCheck?: LimitCheck
 }
 
-export function LeadsClient({ initialLeads, members, workspaceId }: LeadsClientProps) {
+export function LeadsClient({ initialLeads, members, workspaceId, leadLimitCheck }: LeadsClientProps) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'todos'>('todos')
@@ -94,6 +97,9 @@ export function LeadsClient({ initialLeads, members, workspaceId }: LeadsClientP
 
   const hasFilters = search || statusFilter !== 'todos' || ownerFilter !== 'todos'
 
+  const atLeadLimit = leadLimitCheck?.atLimit ?? false
+  const nearLeadLimit = leadLimitCheck?.nearLimit ?? false
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -102,12 +108,29 @@ export function LeadsClient({ initialLeads, members, workspaceId }: LeadsClientP
         action={
           <Button
             onClick={openCreate}
-            className="bg-violet-600 text-white hover:bg-violet-500"
+            disabled={atLeadLimit}
+            className="bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50"
           >
             Novo Lead
           </Button>
         }
       />
+
+      {(atLeadLimit || nearLeadLimit) && leadLimitCheck && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          {atLeadLimit
+            ? <>Limite de {leadLimitCheck.limit} leads atingido no plano Free.{' '}
+                <a href="/settings/billing" className="underline underline-offset-2 hover:text-amber-200">
+                  Faça upgrade para Pro
+                </a>{' '}para continuar adicionando.</>
+            : <>Você usou {leadLimitCheck.count} de {leadLimitCheck.limit} leads do plano Free.{' '}
+                <a href="/settings/billing" className="underline underline-offset-2 hover:text-amber-200">
+                  Considere fazer upgrade
+                </a>.</>
+          }
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">

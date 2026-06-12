@@ -35,6 +35,10 @@ import {
   updatePassword,
   type ProfileActionResult,
 } from '@/app/actions/auth'
+import {
+  createCheckoutSession,
+  createPortalSession,
+} from '@/app/actions/billing'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -461,8 +465,32 @@ function MembrosTab({
 
 // ─── Billing tab ──────────────────────────────────────────────────────────────
 
-function BillingTab({ plan, memberCount }: { plan: string; memberCount: number }) {
+function BillingTab({
+  plan,
+  memberCount,
+  workspaceId,
+}: {
+  plan: string
+  memberCount: number
+  workspaceId: string
+}) {
   const isFree = plan === 'free'
+  const [isPending, startTransition] = useTransition()
+  const [pendingAction, setPendingAction] = useState<'checkout' | 'portal' | null>(null)
+
+  function handleCheckout() {
+    setPendingAction('checkout')
+    startTransition(async () => {
+      await createCheckoutSession(workspaceId)
+    })
+  }
+
+  function handlePortal() {
+    setPendingAction('portal')
+    startTransition(async () => {
+      await createPortalSession(workspaceId)
+    })
+  }
 
   return (
     <div className="space-y-5">
@@ -500,6 +528,22 @@ function BillingTab({ plan, memberCount }: { plan: string; memberCount: number }
             </div>
           ))}
         </div>
+
+        {!isFree && (
+          <div className="mt-5">
+            <Button
+              onClick={handlePortal}
+              disabled={isPending}
+              variant="outline"
+              className="border-pf-border text-pf-text-sec hover:text-pf-text"
+            >
+              {isPending && pendingAction === 'portal' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Gerenciar assinatura
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Card>
@@ -553,8 +597,15 @@ function BillingTab({ plan, memberCount }: { plan: string; memberCount: number }
               ))}
             </ul>
             {isFree ? (
-              <button className="mt-5 w-full rounded-lg bg-pf-accent py-2 font-mono text-xs font-bold uppercase tracking-wider text-pf-bg transition-all hover:brightness-110">
-                Fazer upgrade
+              <button
+                onClick={handleCheckout}
+                disabled={isPending}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-pf-accent py-2 font-mono text-xs font-bold uppercase tracking-wider text-pf-bg transition-all hover:brightness-110 disabled:opacity-60"
+              >
+                {isPending && pendingAction === 'checkout' ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : null}
+                Assinar Pro
               </button>
             ) : (
               <div className="mt-5 rounded-lg border border-pf-accent/40 py-2 text-center font-mono text-xs font-medium text-pf-accent">
@@ -815,7 +866,7 @@ function SettingsContent() {
         />
       )}
       {activeTab === 'billing' && (
-        <BillingTab plan={plan} memberCount={members.length} />
+        <BillingTab plan={plan} memberCount={members.length} workspaceId={workspaceId} />
       )}
       {activeTab === 'conta' && <ContaTab />}
     </div>

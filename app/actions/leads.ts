@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import * as z from 'zod'
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Lead, LeadStatus } from '@/types/lead'
+import { canAddLead } from '@/lib/limits'
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -134,6 +135,13 @@ export async function createLead(
 
   const admin = getSupabaseAdminClient()
   await assertMembership(admin, workspaceId, user.id)
+
+  const limit = await canAddLead(workspaceId)
+  if (!limit.allowed) {
+    return {
+      error: `Limite de ${limit.limit} leads atingido no plano Free. Faça upgrade para o Pro em Configurações › Billing.`,
+    }
+  }
 
   const { error } = await admin.from('leads').insert({
     workspace_id: workspaceId,

@@ -5,8 +5,7 @@ import { redirect } from 'next/navigation'
 import * as z from 'zod'
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server'
 import { sendInviteEmail } from '@/lib/resend'
-
-const FREE_MEMBER_LIMIT = 2
+import { canAddMember } from '@/lib/limits'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -129,18 +128,11 @@ export async function sendInvite(
 
   if (!workspace) return { error: 'Workspace não encontrado.' }
 
-  // Enforce Free plan member limit
-  if (workspace.plan === 'free') {
-    const { count } = await admin
-      .from('workspace_members')
-      .select('user_id', { count: 'exact', head: true })
-      .eq('workspace_id', workspaceId)
-
-    if ((count ?? 0) >= FREE_MEMBER_LIMIT) {
-      return {
-        error: `O plano Free permite no máximo ${FREE_MEMBER_LIMIT} membros. Faça upgrade para Pro.`,
-        limitReached: true,
-      }
+  const limit = await canAddMember(workspaceId)
+  if (!limit.allowed) {
+    return {
+      error: `O plano Free permite no máximo ${limit.limit} membros. Faça upgrade para Pro.`,
+      limitReached: true,
     }
   }
 
