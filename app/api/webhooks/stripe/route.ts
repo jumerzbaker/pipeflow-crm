@@ -52,12 +52,35 @@ export async function POST(request: Request) {
           .update({ plan: 'free', stripe_subscription_id: null })
           .eq('id', workspaceId)
       } else {
-        // fallback: busca pelo stripe_subscription_id
         await admin
           .from('workspaces')
           .update({ plan: 'free', stripe_subscription_id: null })
           .eq('stripe_subscription_id', subscription.id)
       }
+      break
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice
+      const subDetails = invoice.parent?.subscription_details
+      const workspaceId = subDetails?.metadata?.workspace_id
+        ?? (subDetails?.subscription
+          ? await admin
+              .from('workspaces')
+              .select('id')
+              .eq('stripe_subscription_id', subDetails.subscription as string)
+              .maybeSingle()
+              .then(({ data }) => data?.id)
+          : undefined)
+
+      if (!workspaceId) break
+
+      // Registra a falha — o plano só é rebaixado em subscription.deleted
+      // para dar tempo ao Stripe de tentar novamente (Smart Retries)
+      await admin
+        .from('workspaces')
+        .update({ payment_failed: true })
+        .eq('id', workspaceId)
       break
     }
   }

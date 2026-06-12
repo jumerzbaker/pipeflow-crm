@@ -244,6 +244,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          payment_failed: boolean
           plan: string
           slug: string
           stripe_customer_id: string | null
@@ -253,6 +254,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          payment_failed?: boolean
           plan?: string
           slug: string
           stripe_customer_id?: string | null
@@ -262,6 +264,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          payment_failed?: boolean
           plan?: string
           slug?: string
           stripe_customer_id?: string | null

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import * as z from 'zod'
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Lead, LeadStatus } from '@/types/lead'
+import { canAddLead } from '@/lib/limits'
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -124,8 +125,6 @@ export async function getLeadById(
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
-const FREE_LEAD_LIMIT = 50
-
 export async function createLead(
   workspaceId: string,
   formData: LeadFormData,
@@ -137,24 +136,10 @@ export async function createLead(
   const admin = getSupabaseAdminClient()
   await assertMembership(admin, workspaceId, user.id)
 
-  // Enforce Free plan lead limit
-  const { data: workspace } = await admin
-    .from('workspaces')
-    .select('plan')
-    .eq('id', workspaceId)
-    .single()
-
-  if (workspace?.plan === 'free') {
-    const { count } = await admin
-      .from('leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('workspace_id', workspaceId)
-
-    if ((count ?? 0) >= FREE_LEAD_LIMIT) {
-      return {
-        error:
-          'Limite de 50 leads atingido no plano Free. Faça upgrade para o Pro em Configurações › Billing.',
-      }
+  const limit = await canAddLead(workspaceId)
+  if (!limit.allowed) {
+    return {
+      error: `Limite de ${limit.limit} leads atingido no plano Free. Faça upgrade para o Pro em Configurações › Billing.`,
     }
   }
 
